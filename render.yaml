@@ -9,6 +9,3 @@ services:
     envVars:
       - key: PORT
         value: 8080
-    volumes:
-      - path: ./backend/src
-        mountPath: /backend
