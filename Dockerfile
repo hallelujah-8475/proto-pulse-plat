@@ -1,3 +1,4 @@
-FROM node:22.1.0
-WORKDIR /frontend
-CMD [ "sh","-c","npm run dev" ]
+FROM golang:1.23
+WORKDIR /backend
+RUN go install github.com/cosmtrek/air@v1.40.4
+CMD ["air"]
