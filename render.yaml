@@ -1,0 +1,14 @@
+services:
+  - name: backend
+    type: web
+    env: docker
+    buildCommand: ./build/backend
+    dockerfilePath: ./build/backend/Dockerfile
+    autoDeploy: true
+    plan: free
+    envVars:
+      - key: PORT
+        value: 8080
+    volumes:
+      - path: ./backend/src
+        mountPath: /backend
