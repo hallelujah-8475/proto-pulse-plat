@@ -4,7 +4,7 @@ FROM golang:1.23
 WORKDIR /backend
 
 # go.mod, go.sum を先にコピーして依存関係をインストール
-COPY ./backend/go.mod ./backend/go.sum ./
+COPY ./backend/src/go.mod ./backend/src/go.sum ./
 RUN go mod tidy
 
 # 残りのソースコードをコピー
