@@ -1,5 +1,5 @@
 DOCKER_COMPOSE=docker-compose
-DOCKER_COMPOSE_FILE=docker-compose.yml
+DOCKER_COMPOSE_FILE=compose.yml
 .PHONY: up
 up:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) up --build  -d
