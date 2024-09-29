@@ -4,4 +4,4 @@ COPY ./backend/src /backend
 RUN go mod tidy
 RUN go build -o proto-pulse-plat
 EXPOSE 8080
-CMD [ "/main.go" ]
+CMD [ "/main" ]
