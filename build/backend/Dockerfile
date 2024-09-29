@@ -1,7 +1,20 @@
 FROM golang:1.23
+
+# 作業ディレクトリを設定
 WORKDIR /backend
-COPY ./backend/src /backend
+
+# go.mod, go.sum を先にコピーして依存関係をインストール
+COPY ./backend/go.mod ./backend/go.sum ./
 RUN go mod tidy
+
+# 残りのソースコードをコピー
+COPY ./backend/src /backend
+
+# アプリケーションをビルド
 RUN go build -o proto-pulse-plat
+
+# ポートをエクスポート
 EXPOSE 8080
-CMD [ "/main" ]
+
+# コンテナ起動時に実行するコマンド
+CMD [ "/backend/proto-pulse-plat" ]
