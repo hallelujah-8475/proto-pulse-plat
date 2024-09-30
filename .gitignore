@@ -26,4 +26,5 @@ go.work.sum
 
 vendor
 
+backend/tmp
 backend/src/tmp

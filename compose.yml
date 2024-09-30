@@ -1,8 +1,16 @@
 version: '3'
 services:
+  frontend:
+    build:
+      dockerfile: ./build/frontend/Dockerfile
+    volumes:
+      - ./frontend:/frontend
+    ports:
+      - "3000:3000"
   backend:
     build:
       dockerfile: ./build/backend/Dockerfile
+    volumes:
+      - ./backend/src:/backend
     ports:
       - "8080:8080"
-    command: ["air"]
