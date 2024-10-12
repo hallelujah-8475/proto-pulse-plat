@@ -28,3 +28,5 @@ vendor
 
 backend/tmp
 backend/src/tmp
+backend/src/server.crt
+backend/src/server.key
