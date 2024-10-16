@@ -11,3 +11,6 @@ restart: down up
 .PHONY: logs
 logs:
 	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) logs -f
+.PHONY: goose-up
+goose-up:
+	goose -dir backend/src/migration postgres "user=myuser password=mypassword dbname=mydatabase host=localhost port=5432 sslmode=disable" up
