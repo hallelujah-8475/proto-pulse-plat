@@ -41,11 +41,11 @@ func main() {
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.Oauth2callbackHandler)
 	apiRouter.HandleFunc("/user/profile", oauthClientHandler.UserProfileHandler)
 	postRouter := apiRouter.PathPrefix("/post").Subrouter()
-	postRouter.HandleFunc("/add", postHandler.AddPost)
+	postRouter.HandleFunc("/add", postHandler.Add)
 	postRouter.HandleFunc("/delete", postHandler.Delete)
-	postRouter.HandleFunc("/list", postHandler.GetPosts)
+	postRouter.HandleFunc("/list", postHandler.List)
 	postRouter.HandleFunc("/get", postHandler.GetPost)
-	postRouter.HandleFunc("/edit", postHandler.UpdatePost)
+	postRouter.HandleFunc("/edit", postHandler.Update)
 
 	corsMiddleware := middleware.CORSMiddleware()
 	srv := &http.Server{
