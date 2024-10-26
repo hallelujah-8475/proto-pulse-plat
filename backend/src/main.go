@@ -8,9 +8,14 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	postgres_driver "gorm.io/driver/postgres"
+	"gorm.io/gorm"
 
+	"proto-pulse-plat/app/application/web/usecase"
 	"proto-pulse-plat/app/presentation/http/web/handler"
-	"proto-pulse-plat/app/presentation/http/web/handler/application/web/usecase"
+	"proto-pulse-plat/config"
+	"proto-pulse-plat/infrastructure/persistence/postgres"
+	"proto-pulse-plat/middleware"
 )
 
 func main() {
@@ -19,18 +24,33 @@ func main() {
 		log.Println("Error loading .env file")
 	}
 
+	db, err := gorm.Open(postgres_driver.Open(config.GetDSN()), &gorm.Config{})
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+
 	oauthUsecase := usecase.NewOAuthUseCase()
 	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase)
+	postRepository := postgres.NewGormPostsRepository(db)
+	postUsecase := usecase.NewPostUsecase(postRepository)
+	postHandler := handler.NewPostHandler(postUsecase)
 
 	r := mux.NewRouter()
-
 	apiRouter := r.PathPrefix("/api").Subrouter()
 	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthHandler)
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.Oauth2callbackHandler)
+	apiRouter.HandleFunc("/user/profile", oauthClientHandler.UserProfileHandler)
+	postRouter := apiRouter.PathPrefix("/post").Subrouter()
+	postRouter.HandleFunc("/add", postHandler.AddPost)
+	postRouter.HandleFunc("/delete", postHandler.Delete)
+	postRouter.HandleFunc("/list", postHandler.GetPosts)
+	postRouter.HandleFunc("/get", postHandler.GetPost)
+	postRouter.HandleFunc("/edit", postHandler.UpdatePost)
 
+	corsMiddleware := middleware.CORSMiddleware()
 	srv := &http.Server{
 		Addr:    ":" + os.Getenv("API_PORT"),
-		Handler: r,
+		Handler: corsMiddleware(r),
 	}
 	err = srv.ListenAndServeTLS("server.crt", "server.key")
 	if err != nil {
