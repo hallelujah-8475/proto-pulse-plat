@@ -14,3 +14,6 @@ logs:
 .PHONY: goose-up
 goose-up:
 	goose -dir backend/src/migration postgres "user=myuser password=mypassword dbname=mydatabase host=localhost port=5432 sslmode=disable" up
+.PHONY: goose-down
+goose-down:
+	goose -dir backend/src/migration postgres "user=myuser password=mypassword dbname=mydatabase host=localhost port=5432 sslmode=disable" down
