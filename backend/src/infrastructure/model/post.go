@@ -4,6 +4,7 @@ import "time"
 
 type Post struct {
     ID        int       `json:"id"`
+    Title   string    `json:"title"`
     Content   string    `json:"content"`
     FileName  string    `json:"file_name"`
     UserID    int       `json:"user_id"`
