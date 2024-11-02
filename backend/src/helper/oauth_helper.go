@@ -7,8 +7,13 @@ import (
 	"encoding/base64"
 	"encoding/hex"
 	"net/url"
+	"os"
+	"proto-pulse-plat/infrastructure/model"
 	"sort"
 	"strings"
+	"time"
+
+	"github.com/golang-jwt/jwt/v4"
 )
 
 // oauth_nonce を生成する関数
@@ -52,4 +57,19 @@ func EncodeParameters(params url.Values) string {
 		}
 	}
 	return strings.Join(queryString, "&")
+}
+
+// JWTを生成する関数
+func GenerateJWT(profile model.UserProfile) (string, error) {
+	expirationTime := time.Now().Add(24 * time.Hour)
+
+	claims := &jwt.MapClaims{
+		"name":        profile.Name,
+		"screen_name": profile.ScreenName,
+		"profile_image_url": profile.ProfileImageUrl,
+		"exp":        expirationTime.Unix(),
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
 }

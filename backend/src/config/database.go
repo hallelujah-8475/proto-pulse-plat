@@ -5,13 +5,13 @@ import (
 )
 
 var (
-    host     = getEnv("POSTGRES_HOST", "postgres_container")
-    user     = getEnv("POSTGRES_USER", "myuser")
-    password = getEnv("POSTGRES_PASSWORD", "mypassword")
-    dbname   = getEnv("POSTGRES_DBNAME", "mydatabase")
-    port     = getEnv("POSTGRES_PORT", "5432")
-    sslmode  = getEnv("POSTGRES_SSLMODE", "disable")
-    timezone = getEnv("POSTGRES_TIMEZONE", "Asia/Tokyo")
+    host     = GetEnv("POSTGRES_HOST", "postgres_container")
+    user     = GetEnv("POSTGRES_USER", "myuser")
+    password = GetEnv("POSTGRES_PASSWORD", "mypassword")
+    dbname   = GetEnv("POSTGRES_DBNAME", "mydatabase")
+    port     = GetEnv("POSTGRES_PORT", "5432")
+    sslmode  = GetEnv("POSTGRES_SSLMODE", "disable")
+    timezone = GetEnv("POSTGRES_TIMEZONE", "Asia/Tokyo")
 )
 
 func GetDSN() string {

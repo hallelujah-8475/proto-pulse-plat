@@ -29,17 +29,19 @@ func main() {
 		log.Fatalf("failed to connect to database: %v", err)
 	}
 
-	oauthUsecase := usecase.NewOAuthUseCase()
-	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase)
+	xConfig := config.LoadXconfig()
+
+	oauthUsecase := usecase.NewOAuthUseCase(xConfig)
+	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase, xConfig)
 	postRepository := postgres.NewGormPostsRepository(db)
 	postUsecase := usecase.NewPostUsecase(postRepository)
 	postHandler := handler.NewPostHandler(postUsecase)
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthHandler)
-	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.Oauth2callbackHandler)
-	apiRouter.HandleFunc("/user/profile", oauthClientHandler.UserProfileHandler)
+	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthCertificate)
+	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.OauthCallback)
+	apiRouter.HandleFunc("/user/profile", oauthClientHandler.UserProfile)
 	postRouter := apiRouter.PathPrefix("/post").Subrouter()
 	postRouter.HandleFunc("/add", postHandler.Add)
 	postRouter.HandleFunc("/delete", postHandler.Delete)

@@ -7,6 +7,7 @@ type Post struct {
 	Title  string `gorm:"type:varchar(255)"`
 	Content   string `gorm:"type:text"`
 	FileName  string `gorm:"type:varchar(255)"`
+	FilePath  string `gorm:"type:varchar(255)"`
 	UserID    uint   `gorm:"not null"`
 	User      User   `gorm:"foreignKey:UserID"`
 	CreatedAt time.Time

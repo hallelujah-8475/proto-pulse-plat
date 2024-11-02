@@ -8,59 +8,67 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"proto-pulse-plat/app/presentation/http/web/handler/application/web/usecase"
-)
+	"proto-pulse-plat/app/application/web/usecase"
+	"proto-pulse-plat/config"
+	"proto-pulse-plat/helper"
+	"proto-pulse-plat/infrastructure/model"
+	"time"
 
-type UserProfile struct {
-	Name            string `json:"name"`
-	ScreenName      string `json:"screen_name"`
-	ProfileImageUrl string `json:"profile_image_url_https"`
-}
+	"github.com/gorilla/sessions"
+)
 
 type OAuthClient struct {
 	OauthUsecase      usecase.OAuthUsecase
-	AuthorizeURL      string
-	VerifyCredentials string
 }
 
-func NewOAuthClient(oauthUsecase usecase.OAuthUsecase) *OAuthClient {
+func NewOAuthClient(oauthUsecase usecase.OAuthUsecase, xConfig *config.Xconfig) *OAuthClient {
 	return &OAuthClient{
 		OauthUsecase:      oauthUsecase,
-		AuthorizeURL:      os.Getenv("TWITTER_AUTHORIZE_URL"),
-		VerifyCredentials: os.Getenv("TWITTER_VERIFY_CREDENTIALS"),
 	}
 }
 
-func (oc *OAuthClient) OauthHandler(w http.ResponseWriter, r *http.Request) {
+func (oc *OAuthClient) OauthCertificate(w http.ResponseWriter, r *http.Request) {
 	oauthToken, err := oc.OauthUsecase.GetOAuthToken()
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	req, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s?oauth_token=%s", oc.AuthorizeURL, oauthToken), nil)
+	req, err := oc.OauthUsecase.MakeOAuthRequest(oauthToken)
 	if err != nil {
-		log.Fatal("Error creating request:", err)
+		fmt.Println("Error creating request:", err)
+		return
 	}
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		log.Fatal("Error sending request:", err)
+		fmt.Println("Error sending request:", err)
+		return
 	}
 	defer resp.Body.Close()
 
-	http.Redirect(w, r, resp.Request.URL.String(), http.StatusFound)
+	response := map[string]string{"redirectURL": resp.Request.URL.String()}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		http.Error(w, "Failed to send JSON response", http.StatusInternalServerError)
+		log.Println("Error encoding JSON response:", err)
+	}
 }
 
-func (oc *OAuthClient) Oauth2callbackHandler(w http.ResponseWriter, r *http.Request) {
+func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 	params := url.Values{}
 	params.Add("oauth_token", r.URL.Query().Get("oauth_token"))
 	params.Add("oauth_verifier", r.URL.Query().Get("oauth_verifier"))
 
-	oauthClient := oc.OauthUsecase.MakeOAuthClient(params)
+	oauthClient, err := oc.OauthUsecase.MakeOAuthClient(params)
+	if err != nil {
+		fmt.Println("Error MakeOAuthClient:", err)
+		return
+	}
 
-	resp, err := oauthClient.Get(oc.VerifyCredentials)
+	resp, err := oc.OauthUsecase.GetOAuthResponse(oauthClient)
 	if err != nil {
 		fmt.Println("Error verifying credentials:", err)
 		return
@@ -73,15 +81,35 @@ func (oc *OAuthClient) Oauth2callbackHandler(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	var profile UserProfile
+	var profile model.UserProfile
 	if err := json.Unmarshal(body, &profile); err != nil {
 		fmt.Println("Error parsing JSON:", err)
 		return
 	}
 
-	fmt.Printf("Name: %s\n", profile.Name)
-	fmt.Printf("Screen Name: %s\n", profile.ScreenName)
-	fmt.Printf("Profile Image URL: %s\n", profile.ProfileImageUrl)
+	tokenString, err := helper.GenerateJWT(profile)
+	if err != nil {
+		fmt.Println("Error generating JWT:", err)
+		return
+	}
 
-	fmt.Fprintln(w, "Authentication successful! You can close this window.")
+	http.SetCookie(w, &http.Cookie{
+		Name:     "jwt",
+		Value:    tokenString,
+		Path:     "/",
+		Expires:  time.Now().Add(24 * time.Hour),
+		HttpOnly: true,
+		Secure:   false,
+	})
+
+	storeKeyString := os.Getenv("COOKIE_STORE_KEY")
+	var store = sessions.NewCookieStore([]byte(storeKeyString))
+
+	session, _ := store.Get(r, "auth-session")
+	session.Values["name"] = profile.Name
+	session.Values["screen_name"] = profile.ScreenName
+	session.Values["profile_image_url_https"] = profile.ProfileImageUrl
+	session.Save(r, w)
+
+	http.Redirect(w, r, fmt.Sprintf("%s:%s", os.Getenv("BASE_HTTP_URL"), os.Getenv("WEB_PORT")), http.StatusSeeOther)
 }
