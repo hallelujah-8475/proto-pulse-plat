@@ -1,9 +1,11 @@
 package handler
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"os"
+	"proto-pulse-plat/infrastructure/model"
 	"strings"
 
 	"github.com/golang-jwt/jwt/v4"
@@ -70,7 +72,12 @@ func (ch *CertificationHandler) Certificate(w http.ResponseWriter, r *http.Reque
         return
     }
 
-    // ユーザー情報を利用して必要な処理を行う
-    fmt.Fprintf(w, "Authenticated user: %s (%s)", name, screenName)
-    fmt.Fprintf(w, "Profile image URL: %s", profileImageUrl)
+	profile := model.UserProfile{
+		Name:            name,
+		ScreenName:      screenName,
+		ProfileImageUrl: profileImageUrl,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(profile)
 }
