@@ -13,8 +13,6 @@ import (
 	"proto-pulse-plat/helper"
 	"proto-pulse-plat/infrastructure/model"
 	"time"
-
-	"github.com/gorilla/sessions"
 )
 
 type OAuthClient struct {
@@ -65,12 +63,14 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 	oauthClient, err := oc.OauthUsecase.MakeOAuthClient(params)
 	if err != nil {
 		fmt.Println("Error MakeOAuthClient:", err)
+		http.Error(w, "OAuth client creation failed", http.StatusInternalServerError)
 		return
 	}
 
 	resp, err := oc.OauthUsecase.GetOAuthResponse(oauthClient)
 	if err != nil {
 		fmt.Println("Error verifying credentials:", err)
+		http.Error(w, "OAuth response retrieval failed", http.StatusInternalServerError)
 		return
 	}
 	defer resp.Body.Close()
@@ -78,18 +78,21 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		fmt.Println("Error reading response:", err)
+		http.Error(w, "Failed to read response body", http.StatusInternalServerError)
 		return
 	}
 
 	var profile model.UserProfile
 	if err := json.Unmarshal(body, &profile); err != nil {
 		fmt.Println("Error parsing JSON:", err)
+		http.Error(w, "Failed to parse JSON response", http.StatusInternalServerError)
 		return
 	}
 
 	tokenString, err := helper.GenerateJWT(profile)
 	if err != nil {
 		fmt.Println("Error generating JWT:", err)
+		http.Error(w, "Failed to generate JWT", http.StatusInternalServerError)
 		return
 	}
 
@@ -99,17 +102,10 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: true,
-		Secure:   false,
+		Secure:   false, // 本番環境では true にする
 	})
 
-	storeKeyString := os.Getenv("COOKIE_STORE_KEY")
-	var store = sessions.NewCookieStore([]byte(storeKeyString))
-
-	session, _ := store.Get(r, "auth-session")
-	session.Values["name"] = profile.Name
-	session.Values["screen_name"] = profile.ScreenName
-	session.Values["profile_image_url_https"] = profile.ProfileImageUrl
-	session.Save(r, w)
-
-	http.Redirect(w, r, fmt.Sprintf("%s:%s", os.Getenv("BASE_HTTP_URL"), os.Getenv("WEB_PORT")), http.StatusSeeOther)
+	// リダイレクトURLの作成とリダイレクト
+	redirectURL := fmt.Sprintf("%s:%s", os.Getenv("BASE_HTTP_URL"), os.Getenv("WEB_PORT"))
+	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }

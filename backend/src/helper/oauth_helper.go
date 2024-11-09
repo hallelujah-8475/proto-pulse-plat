@@ -6,6 +6,7 @@ import (
 	"crypto/sha1"
 	"encoding/base64"
 	"encoding/hex"
+	"fmt"
 	"net/url"
 	"os"
 	"proto-pulse-plat/infrastructure/model"
@@ -63,13 +64,23 @@ func EncodeParameters(params url.Values) string {
 func GenerateJWT(profile model.UserProfile) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 
-	claims := &jwt.MapClaims{
-		"name":        profile.Name,
-		"screen_name": profile.ScreenName,
+	// クレームを作成
+	claims := jwt.MapClaims{
+		"name":             profile.Name,
+		"screen_name":      profile.ScreenName,
 		"profile_image_url": profile.ProfileImageUrl,
-		"exp":        expirationTime.Unix(),
+		"exp":              expirationTime.Unix(),
 	}
 
+	// トークンを生成
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(os.Getenv("JWT_SECRET_KEY")))
+
+	// 環境変数からシークレットキーを取得
+	secretKey := os.Getenv("JWT_SECRET_KEY")
+	if secretKey == "" {
+		return "", fmt.Errorf("JWT_SECRET_KEY is not set in environment variables")
+	}
+
+	// トークンを署名し、文字列形式で返す
+	return token.SignedString([]byte(secretKey))
 }

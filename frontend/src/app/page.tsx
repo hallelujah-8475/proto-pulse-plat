@@ -174,6 +174,23 @@ export default function Home() {
     }
   };
 
+  const testJWT = async () => {
+    const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/certification`;
+
+    try {
+      const response = await axios.get(fetchURL, {
+        withCredentials: true,
+      });
+      console.log(response);
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error fetching certification:", error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
+
   useLayoutEffect(() => {
     // fetchUserProfile();
     fetchPosts();
@@ -185,6 +202,7 @@ export default function Home() {
     <>
       <header className="text-gray-600 body-font">
         <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
+          <button onClick={testJWT}>testJWT</button>
           <a className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -201,7 +219,7 @@ export default function Home() {
             <span className="ml-3 text-xl">Tailblocks</span>
           </a>
           <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center"></nav>
-          <a href={`${process.env.BASE_URL}/post`}>
+          <a href="/post">
             <button
               type="button"
               className="mb-2 flex rounded bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white px-6 py-2.5 text-xs font-medium uppercase leading-normal shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"

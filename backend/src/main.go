@@ -31,6 +31,7 @@ func main() {
 
 	xConfig := config.LoadXconfig()
 
+	certificationHandler := handler.NewCertificationHandler()
 	oauthUsecase := usecase.NewOAuthUseCase(xConfig)
 	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase, xConfig)
 	postRepository := postgres.NewGormPostsRepository(db)
@@ -39,6 +40,7 @@ func main() {
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
+	apiRouter.HandleFunc("/certification", certificationHandler.Certificate)
 	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthCertificate)
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.OauthCallback)
 	apiRouter.HandleFunc("/user/profile", oauthClientHandler.UserProfile)
