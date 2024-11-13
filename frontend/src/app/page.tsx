@@ -261,10 +261,13 @@ export default function Home() {
       <div className="h-screen dark:bg-gray-800">
         <div className="py-20 px-6 md:px-12 lg:grid lg:grid-cols-4 lg:gap-8">
           {posts.map((post) => (
-            <div className="max-w-sm mx-auto bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+            <div
+              key={post.id}
+              className="max-w-sm mx-auto bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg"
+            >
               <div className="border-b px-4 pb-6">
                 <div className="text-center my-4">
-                  <a className="p-8 max-w-lg border border-gray-300 rounded-2xl hover:shadow-xl hover:shadow-gray-50 flex flex-col items-center">
+                  <div className="p-8 max-w-lg border border-gray-300 rounded-2xl hover:shadow-xl hover:shadow-gray-50 flex flex-col items-center">
                     <img
                       src={post.file_path}
                       className="shadow rounded-lg overflow-hidden border"
@@ -335,7 +338,7 @@ export default function Home() {
                           </div>
                         )}
                     </div>
-                  </a>
+                  </div>
                   <img
                     className="h-32 w-32 rounded-full border-4 border-white dark:border-gray-800 mx-auto my-4"
                     src={post.user.icon_url}
