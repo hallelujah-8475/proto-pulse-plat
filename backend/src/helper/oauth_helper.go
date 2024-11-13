@@ -66,10 +66,10 @@ func GenerateJWT(profile model.UserProfile) (string, error) {
 
 	// クレームを作成
 	claims := jwt.MapClaims{
-		"name":             profile.Name,
-		"screen_name":      profile.ScreenName,
+		"name":              profile.Name,
+		"screen_name":       profile.ScreenName,
 		"profile_image_url": profile.ProfileImageUrl,
-		"exp":              expirationTime.Unix(),
+		"exp":               expirationTime.Unix(),
 	}
 
 	// トークンを生成

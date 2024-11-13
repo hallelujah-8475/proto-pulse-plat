@@ -12,6 +12,7 @@ RUN go build -o proto-pulse-plat
 
 EXPOSE 8080
 
-RUN go install github.com/cosmtrek/air@v1.40.4
+RUN go install github.com/cosmtrek/air@v1.40.4 \
+&& go install github.com/segmentio/golines@v0.12.2
 
 CMD ["air"]

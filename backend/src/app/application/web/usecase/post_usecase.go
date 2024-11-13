@@ -57,7 +57,7 @@ func (u *postUsecase) List(pageStr, perPageStr string) ([]map[string]interface{}
 	for _, post := range posts {
 		response = append(response, entity.Post{
 			ID:        post.ID,
-			Title: post.Title,
+			Title:     post.Title,
 			Content:   post.Content,
 			FileName:  post.FileName,
 			FilePath:  post.FilePath,
@@ -77,7 +77,7 @@ func (u *postUsecase) List(pageStr, perPageStr string) ([]map[string]interface{}
 	for _, post := range response {
 		responsePost := map[string]interface{}{
 			"id":        post.ID,
-			"title":   post.Title,
+			"title":     post.Title,
 			"content":   post.Content,
 			"file_name": post.FileName,
 			"file_path": post.FilePath,
@@ -110,22 +110,22 @@ func (u *postUsecase) Delete(postID int) error {
 }
 
 func (u *postUsecase) Add(title, content, fileName string, userID uint) error {
-    if content == "" {
-        return errors.New("content cannot be empty")
-    }
-
-	post := model.Post{
-		Title: title,
-		Content: content,
-		FileName: fileName,
-		UserID: int(userID),
+	if content == "" {
+		return errors.New("content cannot be empty")
 	}
 
-    if err := u.postRepo.Save(post); err != nil {
-        return fmt.Errorf("failed to save post: %w", err)
-    }
+	post := model.Post{
+		Title:    title,
+		Content:  content,
+		FileName: fileName,
+		UserID:   int(userID),
+	}
 
-    return nil
+	if err := u.postRepo.Save(post); err != nil {
+		return fmt.Errorf("failed to save post: %w", err)
+	}
+
+	return nil
 }
 
 func (u *postUsecase) GetByID(postID int) (*entity.Post, error) {
@@ -160,26 +160,25 @@ func (u *postUsecase) GetByID(postID int) (*entity.Post, error) {
 
 func (uc *postUsecase) Update(postID int, content, fileName string) error {
 	postEntity, err := uc.postRepo.FindByID(postID)
-    if err != nil {
-        return fmt.Errorf("could not find post with id %d: %w", postID, err)
-    }
+	if err != nil {
+		return fmt.Errorf("could not find post with id %d: %w", postID, err)
+	}
 
-    post := model.Post{
-		ID:  postID,
-        Content:  content,
-        FileName: fileName,
-        UserID:   int(postEntity.UserID),
-        CreatedAt: time.Now(),
-        UpdatedAt: time.Now(),
-    }
+	post := model.Post{
+		ID:        postID,
+		Content:   content,
+		FileName:  fileName,
+		UserID:    int(postEntity.UserID),
+		CreatedAt: time.Now(),
+		UpdatedAt: time.Now(),
+	}
 
-    if err := uc.postRepo.Update(post); err != nil {
-        return fmt.Errorf("failed to update post: %w", err)
-    }
+	if err := uc.postRepo.Update(post); err != nil {
+		return fmt.Errorf("failed to update post: %w", err)
+	}
 
-    return nil
+	return nil
 }
-
 
 // func (uc *postUsecase) GetUserIcon(iconURL string) ([]byte, error) {
 // 	// LocalStackのS3クライアントを作成

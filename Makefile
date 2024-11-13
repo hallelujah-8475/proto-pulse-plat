@@ -17,3 +17,6 @@ goose-up:
 .PHONY: goose-down
 goose-down:
 	goose -dir backend/src/migration postgres "user=myuser password=mypassword dbname=mydatabase host=localhost port=5432 sslmode=disable" down
+.PHONY: gofmt
+gofmt: ## apiコンテナでgofmt実行
+	docker compose exec backend sh -c 'gofmt -l -s -w . && golines . -w -m 120'

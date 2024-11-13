@@ -14,24 +14,24 @@ import (
 )
 
 type OAuthUsecase struct {
-	AuthorizeURL string
+	AuthorizeURL      string
 	VerifyCredentials string
-	RequestTokenURL string
-	AccessTokenURL  string
-	ConsumerKey     string
-	ConsumerSecret  string
-	CallBackURL string
+	RequestTokenURL   string
+	AccessTokenURL    string
+	ConsumerKey       string
+	ConsumerSecret    string
+	CallBackURL       string
 }
 
 func NewOAuthUseCase(xConfig *config.Xconfig) *OAuthUsecase {
 	return &OAuthUsecase{
 		AuthorizeURL:      xConfig.AuthorizeURL,
 		VerifyCredentials: xConfig.VerifyCredentials,
-		RequestTokenURL: xConfig.RequestTokenURL,
-		AccessTokenURL:  xConfig.AccessTokenURL,
-		ConsumerKey:     xConfig.ConsumerKey,
-		ConsumerSecret:  xConfig.ConsumerSecret,
-		CallBackURL: xConfig.CallBackURL,
+		RequestTokenURL:   xConfig.RequestTokenURL,
+		AccessTokenURL:    xConfig.AccessTokenURL,
+		ConsumerKey:       xConfig.ConsumerKey,
+		ConsumerSecret:    xConfig.ConsumerSecret,
+		CallBackURL:       xConfig.CallBackURL,
 	}
 }
 

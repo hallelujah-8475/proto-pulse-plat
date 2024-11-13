@@ -4,7 +4,7 @@ import "time"
 
 type Post struct {
 	ID        uint   `gorm:"primaryKey"`
-	Title  string `gorm:"type:varchar(255)"`
+	Title     string `gorm:"type:varchar(255)"`
 	Content   string `gorm:"type:text"`
 	FileName  string `gorm:"type:varchar(255)"`
 	FilePath  string `gorm:"type:varchar(255)"`

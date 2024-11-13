@@ -16,12 +16,12 @@ import (
 )
 
 type OAuthClient struct {
-	OauthUsecase      usecase.OAuthUsecase
+	OauthUsecase usecase.OAuthUsecase
 }
 
 func NewOAuthClient(oauthUsecase usecase.OAuthUsecase, xConfig *config.Xconfig) *OAuthClient {
 	return &OAuthClient{
-		OauthUsecase:      oauthUsecase,
+		OauthUsecase: oauthUsecase,
 	}
 }
 

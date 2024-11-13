@@ -15,7 +15,7 @@ type GormPostsRepository struct {
 
 type Post struct {
 	ID        uint   `gorm:"primaryKey"`
-	Title string `gorm:"size:255"`
+	Title     string `gorm:"size:255"`
 	Content   string `gorm:"type:text"`
 	FileName  string `gorm:"size:255"`
 	UserID    uint   `gorm:"not null"`
@@ -81,14 +81,14 @@ func (r *GormPostsRepository) FindByID(postID int) (Post, error) {
 }
 
 func (r *GormPostsRepository) Update(post model.Post) error {
-    result := r.DB.Model(&post).Where("id = ?", post.ID).Updates(post)
-    if result.Error != nil {
-        return fmt.Errorf("failed to save post: %w", result.Error)
-    }
+	result := r.DB.Model(&post).Where("id = ?", post.ID).Updates(post)
+	if result.Error != nil {
+		return fmt.Errorf("failed to save post: %w", result.Error)
+	}
 
-    if result.RowsAffected == 0 {
-        return fmt.Errorf("no rows updated, post with id %d might not exist", post.ID)
-    }
+	if result.RowsAffected == 0 {
+		return fmt.Errorf("no rows updated, post with id %d might not exist", post.ID)
+	}
 
-    return nil
+	return nil
 }
