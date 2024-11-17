@@ -18,6 +18,7 @@ type Post struct {
 	Title     string `gorm:"size:255"`
 	Content   string `gorm:"type:text"`
 	FileName  string `gorm:"size:255"`
+	FilePath  string `gorm:"size:255"`
 	UserID    uint   `gorm:"not null"`
 	User      Users  `gorm:"foreignKey:UserID"`
 	CreatedAt time.Time

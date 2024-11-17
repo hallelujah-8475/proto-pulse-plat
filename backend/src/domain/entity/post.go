@@ -1,6 +1,8 @@
 package entity
 
-import "time"
+import (
+	"time"
+)
 
 type Post struct {
 	ID        uint   `gorm:"primaryKey"`

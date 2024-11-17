@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/domain/repository"
+	"proto-pulse-plat/helper"
+	"proto-pulse-plat/infrastructure/mapper"
 	"proto-pulse-plat/infrastructure/model"
 	"strconv"
 	"time"
@@ -76,12 +78,13 @@ func (u *postUsecase) List(pageStr, perPageStr string) ([]map[string]interface{}
 	var responsePosts []map[string]interface{}
 	for _, post := range response {
 		responsePost := map[string]interface{}{
-			"id":        post.ID,
-			"title":     post.Title,
-			"content":   post.Content,
-			"file_name": post.FileName,
-			"file_path": post.FilePath,
-			"user_id":   post.UserID,
+			"id":          post.ID,
+			"title":       post.Title,
+			"content":     post.Content,
+			"file_name":   post.FileName,
+			"file_path":   post.FilePath,
+			"file_base64": helper.GetPostBase64Image(post.FilePath),
+			"user_id":     post.UserID,
 			"user": map[string]interface{}{
 				"id":         post.User.ID,
 				"user_name":  post.User.UserName,
@@ -114,14 +117,7 @@ func (u *postUsecase) Add(title, content, fileName string, userID uint) error {
 		return errors.New("content cannot be empty")
 	}
 
-	post := model.Post{
-		Title:    title,
-		Content:  content,
-		FileName: fileName,
-		UserID:   int(userID),
-	}
-
-	if err := u.postRepo.Save(post); err != nil {
+	if err := u.postRepo.Save(mapper.ToModel(title, content, fileName, userID)); err != nil {
 		return fmt.Errorf("failed to save post: %w", err)
 	}
 
@@ -139,23 +135,7 @@ func (u *postUsecase) GetByID(postID int) (*entity.Post, error) {
 		return nil, fmt.Errorf("failed to get post by ID: %w", err)
 	}
 
-	// 投稿データをエンティティに変換
-	response := &entity.Post{
-		ID:        post.ID,
-		Content:   post.Content,
-		FileName:  post.FileName,
-		UserID:    post.UserID,
-		CreatedAt: post.CreatedAt,
-		UpdatedAt: post.UpdatedAt,
-		User: entity.User{
-			ID:        post.User.ID,
-			UserName:  post.User.UserName,
-			AccountID: post.User.AccountID,
-			IconURL:   post.User.IconURL,
-		},
-	}
-
-	return response, nil
+	return mapper.ToEntity(post), nil
 }
 
 func (uc *postUsecase) Update(postID int, content, fileName string) error {
@@ -179,36 +159,3 @@ func (uc *postUsecase) Update(postID int, content, fileName string) error {
 
 	return nil
 }
-
-// func (uc *postUsecase) GetUserIcon(iconURL string) ([]byte, error) {
-// 	// LocalStackのS3クライアントを作成
-// 	sess := session.Must(session.NewSession(&aws.Config{
-// 		Endpoint:         aws.String(os.Getenv("S3_ENDPOINT")),
-// 		Region:           aws.String(os.Getenv("S3_REGION")),
-// 		Credentials:      credentials.NewStaticCredentials("dummy", "dummy", ""),
-// 		S3ForcePathStyle: aws.Bool(true),
-// 	}))
-// 	svc := s3.New(sess)
-
-//     // S3からオブジェクトを取得するリクエスト
-//     output, err := svc.GetObject(&s3.GetObjectInput{
-//         Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
-//         Key:    aws.String(iconURL),
-//     })
-//     if err != nil {
-//         return nil, fmt.Errorf("failed to get object from S3: %w", err)
-//     }
-//     defer output.Body.Close()
-
-//     // バイトデータとして読み込み
-//     buf := new(bytes.Buffer)
-//     _, err = io.Copy(buf, output.Body)
-//     if err != nil {
-//         return nil, fmt.Errorf("failed to read object body: %w", err)
-//     }
-
-// 	// レスポンスヘッダーを設定して画像データを返す
-// 	w.Header().Set("Content-Type", "image/jpeg") // JPEGの場合
-// 	w.WriteHeader(http.StatusOK)
-// 	w.Write(buf.Bytes())
-// }

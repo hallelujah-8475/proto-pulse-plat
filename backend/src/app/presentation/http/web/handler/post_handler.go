@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"proto-pulse-plat/app/application/web/usecase"
+	"proto-pulse-plat/helper"
 	"strconv"
 )
 
@@ -91,7 +92,7 @@ func (oc *PostHandler) Add(w http.ResponseWriter, r *http.Request) {
 
 	title := r.FormValue("title")
 	if title == "" {
-		http.Error(w, "Content field is required", http.StatusBadRequest)
+		http.Error(w, "Title field is required", http.StatusBadRequest)
 		return
 	}
 
@@ -101,26 +102,27 @@ func (oc *PostHandler) Add(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileName := r.FormValue("filename")
-	if fileName == "" {
-		http.Error(w, "Filename field is required", http.StatusBadRequest)
+	files := r.MultipartForm.File["files[]"]
+	if len(files) == 0 {
+		http.Error(w, "At least one file is required", http.StatusBadRequest)
 		return
 	}
 
-	file, _, err := r.FormFile("file")
-	if err != nil {
-		http.Error(w, "Failed to get file", http.StatusBadRequest)
-		return
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			http.Error(w, "Failed to open file", http.StatusBadRequest)
+			return
+		}
+		defer file.Close()
+
+		err = helper.UploadFileToS3(file, fileHeader.Filename)
+		if err != nil {
+			return
+		}
 	}
-	defer file.Close()
 
-	// fileContent, err := io.ReadAll(file)
-	// if err != nil {
-	// 	http.Error(w, "Failed to read file content", http.StatusInternalServerError)
-	// 	return
-	// }
-
-	if err := oc.PostUsecase.Add(title, content, fileName, 10); err != nil {
+	if err := oc.PostUsecase.Add(title, content, "multiple files uploaded", 10); err != nil {
 		http.Error(w, "Failed to add post", http.StatusInternalServerError)
 		return
 	}
