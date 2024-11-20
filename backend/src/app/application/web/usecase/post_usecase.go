@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"mime/multipart"
 	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/domain/repository"
 	"proto-pulse-plat/helper"
@@ -18,6 +19,7 @@ type PostUsecase interface {
 	Add(title, content, fileName string, userID uint) error
 	GetByID(postID int) (*entity.Post, error)
 	Update(postID int, content, fileName string) error
+	FileUploads(files []*multipart.FileHeader) error
 	// GetUserIcon(iconURL string) ([]byte, error)
 }
 
@@ -157,5 +159,20 @@ func (uc *postUsecase) Update(postID int, content, fileName string) error {
 		return fmt.Errorf("failed to update post: %w", err)
 	}
 
+	return nil
+}
+
+func (uc *postUsecase) FileUploads(files []*multipart.FileHeader) error {
+	for _, fileHeader := range files {
+		file, err := fileHeader.Open()
+		if err != nil {
+			return fmt.Errorf("failed to open file: %w", err)
+		}
+		defer file.Close()
+
+		if err := helper.UploadFileToS3(file, fileHeader.Filename); err != nil {
+			return fmt.Errorf("failed to upload file: %w", err)
+		}
+	}
 	return nil
 }

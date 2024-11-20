@@ -1,39 +1,60 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import axios from "axios";
 
-const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
-  event.preventDefault();
-
-  const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
-
-  if (oauthURL) {
-    try {
-      const response = await axios.get(oauthURL, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200 && response.data.redirectURL) {
-        window.location.href = response.data.redirectURL;
-      } else {
-        console.error("Redirect URL is not available");
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error during OAuth request:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-    }
-  } else {
-    console.error("OAuth URL is not defined");
-  }
-};
+interface UserProfile {
+  name: string;
+  screen_name: string;
+  profile_image_url_https: string;
+}
 
 export const Header: React.FC = () => {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+
+    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
+
+    if (oauthURL) {
+      try {
+        const response = await axios.get(oauthURL, {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.status === 200 && response.data.redirectURL) {
+          const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/certification`;
+          try {
+            const response = await axios.get(fetchURL, {
+              withCredentials: true,
+            });
+            localStorage.setItem("profile", JSON.stringify(response));
+          } catch (error) {
+            if (axios.isAxiosError(error)) {
+              console.error("Error fetching certification:", error.message);
+            } else {
+              console.error("Unexpected error:", error);
+            }
+          }
+          window.location.href = response.data.redirectURL;
+        } else {
+          console.error("Redirect URL is not available");
+        }
+      } catch (error) {
+        if (axios.isAxiosError(error)) {
+          console.error("Error during OAuth request:", error.message);
+        } else {
+          console.error("Unexpected error:", error);
+        }
+      }
+    } else {
+      console.error("OAuth URL is not defined");
+    }
+  };
+
   return (
     <header className="text-gray-600 body-font">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center gap-2">

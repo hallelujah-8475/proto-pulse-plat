@@ -178,6 +178,21 @@ export default function Home() {
     }
   };
 
+  // ローカルストレージからプロファイルを取得する関数
+  const loadProfileFromLocalStorage = () => {
+    try {
+      const profileData = localStorage.getItem("profile");
+      if (profileData) {
+        const parsedProfile = JSON.parse(profileData) as UserProfile;
+        setProfile(parsedProfile);
+      } else {
+        console.warn("No profile found in localStorage");
+      }
+    } catch (error) {
+      console.error("Error loading profile from localStorage:", error);
+    }
+  };
+
   // const testJWT = async () => {
   //   const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/certification`;
 
@@ -198,6 +213,7 @@ export default function Home() {
 
   useLayoutEffect(() => {
     // fetchUserProfile();
+    loadProfileFromLocalStorage();
     fetchPosts();
   }, [paging.page, paging.per_page]);
 

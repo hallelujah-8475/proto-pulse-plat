@@ -4,9 +4,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"proto-pulse-plat/app/application/web/usecase"
+	"proto-pulse-plat/app/presentation/http/web/validation"
 	"proto-pulse-plat/helper"
 	"strconv"
 )
@@ -79,51 +81,32 @@ func (oc *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (oc *PostHandler) Add(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
-	err := r.ParseMultipartForm(10 << 20)
+	err := helper.ValidateMethod(r, http.MethodPost)
 	if err != nil {
-		http.Error(w, "Failed to parse multipart form", http.StatusBadRequest)
+		log.Println(err)
 		return
 	}
 
-	title := r.FormValue("title")
-	if title == "" {
-		http.Error(w, "Title field is required", http.StatusBadRequest)
+	err = helper.ParseMultipart(r)
+	if err != nil {
+		log.Println(err)
 		return
 	}
 
-	content := r.FormValue("content")
-	if content == "" {
-		http.Error(w, "Content field is required", http.StatusBadRequest)
+	title, content, files, err := validation.ValidateFormInputs(r)
+	if err != nil {
+		helper.WriteErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	files := r.MultipartForm.File["files[]"]
-	if len(files) == 0 {
-		http.Error(w, "At least one file is required", http.StatusBadRequest)
+	err = oc.PostUsecase.FileUploads(files)
+	if err != nil {
+		helper.WriteErrorResponse(w, "Failed to upload files", http.StatusInternalServerError)
 		return
-	}
-
-	for _, fileHeader := range files {
-		file, err := fileHeader.Open()
-		if err != nil {
-			http.Error(w, "Failed to open file", http.StatusBadRequest)
-			return
-		}
-		defer file.Close()
-
-		err = helper.UploadFileToS3(file, fileHeader.Filename)
-		if err != nil {
-			return
-		}
 	}
 
 	if err := oc.PostUsecase.Add(title, content, "multiple files uploaded", 10); err != nil {
-		http.Error(w, "Failed to add post", http.StatusInternalServerError)
+		helper.WriteErrorResponse(w, "Failed to add post", http.StatusInternalServerError)
 		return
 	}
 

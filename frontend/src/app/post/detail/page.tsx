@@ -2,6 +2,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Header } from "../../components/Header";
+import { Footer } from "../../components/Footer";
 
 interface PostDetail {
   title: string;
@@ -73,14 +75,7 @@ const PostDetailPage: React.FC = () => {
 
   return (
     <>
-      <header className="text-gray-600 body-font">
-        <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center">
-          <a className="flex title-font font-medium items-center text-gray-900 mb-4 md:mb-0">
-            <span className="ml-3 text-xl">Post Detail</span>
-          </a>
-        </div>
-      </header>
-
+      <Header />
       <div className="h-screen dark:bg-gray-800">
         <div className="max-w-xl mt-20 mx-auto p-5">
           {isLoading ? (
@@ -176,6 +171,7 @@ const PostDetailPage: React.FC = () => {
           )}
         </div>
       </div>
+      <Footer />
     </>
   );
 };
