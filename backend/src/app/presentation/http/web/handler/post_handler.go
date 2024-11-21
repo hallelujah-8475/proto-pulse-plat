@@ -27,9 +27,8 @@ type DeletePostRequest struct {
 	PostID int `json:"post_id"`
 }
 
-func (oc *PostHandler) List(w http.ResponseWriter, r *http.Request) {
-	pageStr := r.URL.Query().Get("page")
-	perPageStr := r.URL.Query().Get("perPage")
+func (oc *PostHandler) GetPostList(w http.ResponseWriter, r *http.Request) {
+	pageStr, perPageStr := helper.PostListQueryParams(r)
 
 	responsePosts, totalCount, page, perPage, err := oc.PostUsecase.List(pageStr, perPageStr)
 	if err != nil {
@@ -37,22 +36,15 @@ func (oc *PostHandler) List(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	response := map[string]interface{}{
-		"posts":       responsePosts,
-		"total_count": totalCount,
-		"page":        page,
-		"per_page":    perPage,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(response); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	if err := helper.WriteResponse(w, helper.BuildPostListResponse(responsePosts, totalCount, page, perPage)); err != nil {
+		helper.WriteErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
 
-func (oc *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+func (oc *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
+	err := helper.ValidateMethod(r, http.MethodPost)
+	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -69,18 +61,15 @@ func (oc *PostHandler) Delete(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Printf("Post ID to delete: %d\n", req.PostID)
-
 	if err := oc.PostUsecase.Delete(req.PostID); err != nil {
 		http.Error(w, "Failed to delete post", http.StatusInternalServerError)
 		return
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Post %d deleted successfully", req.PostID)))
 }
 
-func (oc *PostHandler) Add(w http.ResponseWriter, r *http.Request) {
+func (oc *PostHandler) AddPost(w http.ResponseWriter, r *http.Request) {
 	err := helper.ValidateMethod(r, http.MethodPost)
 	if err != nil {
 		log.Println(err)
@@ -132,31 +121,15 @@ func (oc *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	responsePost := map[string]interface{}{
-		"id":        post.ID,
-		"content":   post.Content,
-		"file_name": post.FileName,
-		"file_path": post.FilePath,
-		"user_id":   post.UserID,
-		"user": map[string]interface{}{
-			"id":         post.User.ID,
-			"user_name":  post.User.UserName,
-			"account_id": post.User.AccountID,
-			"icon_url":   post.User.IconURL,
-		},
-		"created_at": post.CreatedAt,
-		"updated_at": post.UpdatedAt,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(responsePost); err != nil {
-		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
+	if err := helper.WriteResponse(w, helper.BuildPostResponse(post)); err != nil {
+		helper.WriteErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }
 
-func (oc *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPut {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+func (oc *PostHandler) UpdatePost(w http.ResponseWriter, r *http.Request) {
+	err := helper.ValidateMethod(r, http.MethodPut)
+	if err != nil {
+		log.Println(err)
 		return
 	}
 
@@ -208,5 +181,4 @@ func (oc *PostHandler) Update(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(fmt.Sprintf("Post %d updated successfully", postID)))
 }

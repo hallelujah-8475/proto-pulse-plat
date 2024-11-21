@@ -9,8 +9,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
+	"proto-pulse-plat/domain/entity"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -18,6 +20,40 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/s3"
 )
+
+func PostListQueryParams(r *http.Request) (string, string) {
+	pageStr := r.URL.Query().Get("page")
+	perPageStr := r.URL.Query().Get("perPage")
+
+	return pageStr, perPageStr
+}
+
+func BuildPostListResponse(posts []map[string]interface{}, totalCount int64 , page, perPage int) map[string]interface{} {
+	return map[string]interface{}{
+		"posts":       posts,
+		"total_count": totalCount,
+		"page":        page,
+		"per_page":    perPage,
+	}
+}
+
+func BuildPostResponse(post *entity.Post) map[string]interface{} {
+	return map[string]interface{}{
+		"id":        post.ID,
+		"content":   post.Content,
+		"file_name": post.FileName,
+		"file_path": post.FilePath,
+		"user_id":   post.UserID,
+		"user": map[string]interface{}{
+			"id":         post.User.ID,
+			"user_name":  post.User.UserName,
+			"account_id": post.User.AccountID,
+			"icon_url":   post.User.IconURL,
+		},
+		"created_at": post.CreatedAt,
+		"updated_at": post.UpdatedAt,
+	}
+}
 
 func GetPostBase64Image(iconURL string) string {
 	iconURL = "twitter_icon.png"

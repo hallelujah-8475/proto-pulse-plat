@@ -1,6 +1,7 @@
 package helper
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -21,6 +22,12 @@ func ParseMultipart(r *http.Request) error {
 	}
 	return nil
 }
+
+func WriteResponse(w http.ResponseWriter, response map[string]interface{}) error {
+	w.Header().Set("Content-Type", "application/json")
+	return json.NewEncoder(w).Encode(response)
+}
+
 
 func WriteErrorResponse(w http.ResponseWriter, message string, statusCode int) {
 	http.Error(w, message, statusCode)
