@@ -28,7 +28,7 @@ func PostListQueryParams(r *http.Request) (string, string) {
 	return pageStr, perPageStr
 }
 
-func BuildPostListResponse(posts []map[string]interface{}, totalCount int64 , page, perPage int) map[string]interface{} {
+func BuildPostListResponse(posts []map[string]interface{}, totalCount int64, page, perPage int) map[string]interface{} {
 	return map[string]interface{}{
 		"posts":       posts,
 		"total_count": totalCount,
@@ -40,6 +40,7 @@ func BuildPostListResponse(posts []map[string]interface{}, totalCount int64 , pa
 func BuildPostResponse(post *entity.Post) map[string]interface{} {
 	return map[string]interface{}{
 		"id":        post.ID,
+		"title":     post.Title,
 		"content":   post.Content,
 		"file_name": post.FileName,
 		"file_path": post.FilePath,
