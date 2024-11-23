@@ -7,8 +7,8 @@ import (
 
 func ToEntityPostImage(postImage postgres.PostImage) *entity.PostImage {
 	return &entity.PostImage{
-		ID:        postImage.ID,
+		ID:       postImage.ID,
 		FileName: postImage.FileName,
-		PostID: postImage.PostID,
+		PostID:   postImage.PostID,
 	}
 }

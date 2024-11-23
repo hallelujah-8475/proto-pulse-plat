@@ -18,7 +18,7 @@ type PostImage struct {
 	FileName  string `gorm:"size:255"`
 	FilePath  string `gorm:"size:255"`
 	PostID    uint   `gorm:"not null"`
-	Post      Post  `gorm:"foreignKey:UserID"`
+	Post      Post   `gorm:"foreignKey:UserID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

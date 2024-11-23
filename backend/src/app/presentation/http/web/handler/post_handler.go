@@ -15,15 +15,19 @@ import (
 )
 
 type PostHandler struct {
-	PostUsecase usecase.PostUsecase
-	UserUsecase usecase.UserUsecase
+	PostUsecase      usecase.PostUsecase
+	UserUsecase      usecase.UserUsecase
 	PostImageUsecase usecase.PostImageUsecase
 }
 
-func NewPostHandler(postUsecase usecase.PostUsecase, userUsecase usecase.UserUsecase, postImageUsecase usecase.PostImageUsecase) *PostHandler {
+func NewPostHandler(
+	postUsecase usecase.PostUsecase,
+	userUsecase usecase.UserUsecase,
+	postImageUsecase usecase.PostImageUsecase,
+) *PostHandler {
 	return &PostHandler{
-		PostUsecase: postUsecase,
-		UserUsecase: userUsecase,
+		PostUsecase:      postUsecase,
+		UserUsecase:      userUsecase,
 		PostImageUsecase: postImageUsecase,
 	}
 }
@@ -40,7 +44,7 @@ func (oc *PostHandler) GetPostList(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	var users []entity.User
 	for _, post := range posts {
 		user, err := oc.UserUsecase.GetByID(post.UserID)
@@ -50,7 +54,7 @@ func (oc *PostHandler) GetPostList(w http.ResponseWriter, r *http.Request) {
 		}
 		users = append(users, *user)
 	}
-	
+
 	postImagesMap := make(map[uint][]entity.PostImage)
 	for _, post := range posts {
 		postImages, err := oc.PostImageUsecase.GetByPostID(post.ID)

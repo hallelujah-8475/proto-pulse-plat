@@ -29,7 +29,13 @@ func PostListQueryParams(r *http.Request) (string, string) {
 	return pageStr, perPageStr
 }
 
-func BuildPostListResponse(posts []entity.Post, users []entity.User, postImagesMap map[uint][]entity.PostImage, totalCount int64, page, perPage int) response.PostList {
+func BuildPostListResponse(
+	posts []entity.Post,
+	users []entity.User,
+	postImagesMap map[uint][]entity.PostImage,
+	totalCount int64,
+	page, perPage int,
+) response.PostList {
 	// ユーザーIDをキーにしたユーザーマップを作成
 	userMap := make(map[uint]entity.User)
 	for _, user := range users {
@@ -53,26 +59,25 @@ func BuildPostListResponse(posts []entity.Post, users []entity.User, postImagesM
 
 		// レスポンス用Post構造体に変換
 		responsePost := response.Post{
-			ID: post.ID,
-			Title:            post.Title,
-			Content:          post.Content,
-			PostImageBase64:  postImageBase64,
-			UserName:         user.UserName,
-			AccountID:        user.ID,
-			IconImageBase64:  GetPostBase64Image(user.IconFileName), // UserにIconImageBase64があると仮定
+			ID:              post.ID,
+			Title:           post.Title,
+			Content:         post.Content,
+			PostImageBase64: postImageBase64,
+			UserName:        user.UserName,
+			AccountID:       user.ID,
+			IconImageBase64: GetPostBase64Image(user.IconFileName), // UserにIconImageBase64があると仮定
 		}
 		responsePosts = append(responsePosts, responsePost)
 	}
 
 	// PostList構造体にデータを詰めて返却
 	return response.PostList{
-		Posts:       responsePosts,
+		Posts:      responsePosts,
 		TotalCount: totalCount,
 		Page:       page,
 		PerPage:    perPage,
 	}
 }
-
 
 func BuildPostResponse(post *entity.Post) map[string]interface{} {
 	return map[string]interface{}{
@@ -83,10 +88,10 @@ func BuildPostResponse(post *entity.Post) map[string]interface{} {
 		"file_path": post.FilePath,
 		"user_id":   post.UserID,
 		"user": map[string]interface{}{
-			"id":         post.User.ID,
-			"user_name":  post.User.UserName,
-			"account_id": post.User.AccountID,
-			"icon_file_name":   post.User.IconFileName,
+			"id":             post.User.ID,
+			"user_name":      post.User.UserName,
+			"account_id":     post.User.AccountID,
+			"icon_file_name": post.User.IconFileName,
 		},
 		"created_at": post.CreatedAt,
 		"updated_at": post.UpdatedAt,

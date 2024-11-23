@@ -24,10 +24,10 @@ func ToEntityPost(post postgres.Post) *entity.Post {
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
 		User: entity.User{
-			ID:        post.User.ID,
-			UserName:  post.User.UserName,
-			AccountID: post.User.AccountID,
-			IconFileName:   post.User.IconFileName,
+			ID:           post.User.ID,
+			UserName:     post.User.UserName,
+			AccountID:    post.User.AccountID,
+			IconFileName: post.User.IconFileName,
 		},
 	}
 }

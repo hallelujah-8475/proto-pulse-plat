@@ -42,7 +42,7 @@ func main() {
 
 	certificationHandler := handler.NewCertificationHandler()
 	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase, xConfig)
-	postHandler := handler.NewPostHandler(postUsecase,userUsecase,postImageUsercase)
+	postHandler := handler.NewPostHandler(postUsecase, userUsecase, postImageUsercase)
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
