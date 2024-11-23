@@ -56,14 +56,22 @@ func (r *GormPostsRepository) FindAllWithPagination(limit int, offset int) ([]en
 	return posts, count, nil
 }
 
-func (r *GormPostsRepository) Save(post model.Post) error {
-	result := r.DB.Create(&post)
-	if result.Error != nil {
-		return fmt.Errorf("failed to save post: %w", result.Error)
+
+func (r *GormPostsRepository) Save(post model.Post) (Post, error) {
+	newPost := Post{
+		Title:   post.Title,
+		Content: post.Content,
+		UserID:  uint(post.UserID),
 	}
 
-	return nil
+	result := r.DB.Create(&newPost)
+	if result.Error != nil {
+		return Post{}, fmt.Errorf("failed to save post: %w", result.Error)
+	}
+
+	return newPost, nil
 }
+
 
 func (r *GormPostsRepository) FindByID(postID int) (Post, error) {
 	var post Post

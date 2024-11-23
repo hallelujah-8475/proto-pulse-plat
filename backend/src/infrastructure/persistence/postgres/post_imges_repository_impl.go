@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"proto-pulse-plat/domain/entity"
+	"proto-pulse-plat/infrastructure/model"
 	"time"
 
 	"gorm.io/gorm"
@@ -43,4 +44,13 @@ func (r *GormPostImagesRepository) FindByPostID(postID uint) ([]entity.PostImage
 	r.DB.Model(&entity.Post{})
 
 	return postImages, nil
+}
+
+func (r *GormPostImagesRepository) Save(postImage model.PostImage) error {
+	result := r.DB.Create(&postImage)
+	if result.Error != nil {
+		return fmt.Errorf("failed to save postImage: %w", result.Error)
+	}
+
+	return nil
 }

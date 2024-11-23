@@ -117,14 +117,21 @@ func (oc *PostHandler) AddPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	addedPost, err := oc.PostUsecase.Add(title, content, 10)
+	if err != nil {
+		helper.WriteErrorResponse(w, "Failed to add post", http.StatusInternalServerError)
+		return
+	}
+
 	err = oc.PostUsecase.FileUploads(files)
 	if err != nil {
 		helper.WriteErrorResponse(w, "Failed to upload files", http.StatusInternalServerError)
 		return
 	}
 
-	if err := oc.PostUsecase.Add(title, content, "multiple files uploaded", 10); err != nil {
-		helper.WriteErrorResponse(w, "Failed to add post", http.StatusInternalServerError)
+	err = oc.PostImageUsecase.Add(files, addedPost.ID)
+	if err != nil {
+		helper.WriteErrorResponse(w, "Failed to postImage add", http.StatusInternalServerError)
 		return
 	}
 

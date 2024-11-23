@@ -3,6 +3,7 @@ package usecase
 import (
 	"errors"
 	"fmt"
+	"log"
 	"mime/multipart"
 	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/domain/repository"
@@ -16,11 +17,10 @@ import (
 type PostUsecase interface {
 	List(pageStr, perPageStr string) ([]entity.Post, int64, int, int, error)
 	Delete(postID int) error
-	Add(title, content, fileName string, userID uint) error
+	Add(title, content string, userID uint) (*entity.Post, error)
 	GetByID(postID int) (*entity.Post, error)
 	Update(postID int, content, fileName string) error
 	FileUploads(files []*multipart.FileHeader) error
-	// GetUserIcon(iconURL string) ([]byte, error)
 }
 
 type postUsecase struct {
@@ -72,16 +72,17 @@ func (u *postUsecase) Delete(postID int) error {
 	return nil
 }
 
-func (u *postUsecase) Add(title, content, fileName string, userID uint) error {
+func (u *postUsecase) Add(title, content string, userID uint) (*entity.Post, error) {
 	if content == "" {
-		return errors.New("content cannot be empty")
+		return nil, errors.New("content cannot be empty")
 	}
 
-	if err := u.postRepo.Save(mapper.ToModelPost(title, content, fileName, userID)); err != nil {
-		return fmt.Errorf("failed to save post: %w", err)
+	addedPost, err := u.postRepo.Save(mapper.ToModelPost(title, content, userID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to save post: %w", err)
 	}
 
-	return nil
+	return mapper.ToEntityPost(addedPost), nil
 }
 
 func (u *postUsecase) GetByID(postID int) (*entity.Post, error) {
@@ -107,7 +108,6 @@ func (uc *postUsecase) Update(postID int, content, fileName string) error {
 	post := model.Post{
 		ID:        postID,
 		Content:   content,
-		FileName:  fileName,
 		UserID:    int(postEntity.UserID),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -121,6 +121,11 @@ func (uc *postUsecase) Update(postID int, content, fileName string) error {
 }
 
 func (uc *postUsecase) FileUploads(files []*multipart.FileHeader) error {
+	if files == nil {
+		log.Println("files is nil")
+		return nil
+	}
+
 	for _, fileHeader := range files {
 		file, err := fileHeader.Open()
 		if err != nil {
