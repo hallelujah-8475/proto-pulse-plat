@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"proto-pulse-plat/domain/entity"
+	"proto-pulse-plat/infrastructure/response"
 	"strings"
 
 	"github.com/aws/aws-sdk-go/aws"
@@ -28,14 +29,50 @@ func PostListQueryParams(r *http.Request) (string, string) {
 	return pageStr, perPageStr
 }
 
-func BuildPostListResponse(posts []map[string]interface{}, totalCount int64, page, perPage int) map[string]interface{} {
-	return map[string]interface{}{
-		"posts":       posts,
-		"total_count": totalCount,
-		"page":        page,
-		"per_page":    perPage,
+func BuildPostListResponse(posts []entity.Post, users []entity.User, postImagesMap map[uint][]entity.PostImage, totalCount int64, page, perPage int) response.PostList {
+	// ユーザーIDをキーにしたユーザーマップを作成
+	userMap := make(map[uint]entity.User)
+	for _, user := range users {
+		userMap[user.ID] = user
+	}
+
+	// レスポンス用のPostリストを作成
+	var responsePosts []response.Post
+	for _, post := range posts {
+		// 投稿に関連付けられたユーザー情報を取得
+		user := userMap[post.UserID]
+
+		// 投稿に関連付けられた画像を取得
+		postImages := postImagesMap[post.ID]
+
+		// ベース64エンコードされた画像を結合（例として最初の画像のみ）
+		var postImageBase64 string
+		if len(postImages) > 0 {
+			postImageBase64 = GetPostBase64Image(postImages[0].FileName) // PostImageにBase64フィールドがあると仮定
+		}
+
+		// レスポンス用Post構造体に変換
+		responsePost := response.Post{
+			ID: post.ID,
+			Title:            post.Title,
+			Content:          post.Content,
+			PostImageBase64:  postImageBase64,
+			UserName:         user.UserName,
+			AccountID:        user.ID,
+			IconImageBase64:  GetPostBase64Image(user.IconFileName), // UserにIconImageBase64があると仮定
+		}
+		responsePosts = append(responsePosts, responsePost)
+	}
+
+	// PostList構造体にデータを詰めて返却
+	return response.PostList{
+		Posts:       responsePosts,
+		TotalCount: totalCount,
+		Page:       page,
+		PerPage:    perPage,
 	}
 }
+
 
 func BuildPostResponse(post *entity.Post) map[string]interface{} {
 	return map[string]interface{}{
@@ -49,16 +86,14 @@ func BuildPostResponse(post *entity.Post) map[string]interface{} {
 			"id":         post.User.ID,
 			"user_name":  post.User.UserName,
 			"account_id": post.User.AccountID,
-			"icon_url":   post.User.IconURL,
+			"icon_file_name":   post.User.IconFileName,
 		},
 		"created_at": post.CreatedAt,
 		"updated_at": post.UpdatedAt,
 	}
 }
 
-func GetPostBase64Image(iconURL string) string {
-	iconURL = "twitter_icon.png"
-	fmt.Println(iconURL)
+func GetPostBase64Image(fileName string) string {
 	// LocalStackのS3クライアントを作成
 	sess := session.Must(session.NewSession(&aws.Config{
 		Endpoint:         aws.String(os.Getenv("S3_ENDPOINT")),
@@ -71,7 +106,7 @@ func GetPostBase64Image(iconURL string) string {
 	// S3からオブジェクトを取得するリクエスト
 	output, err := svc.GetObject(&s3.GetObjectInput{
 		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
-		Key:    aws.String(iconURL),
+		Key:    aws.String(fileName),
 	})
 	if err != nil {
 		fmt.Println("failed to get object from S3", err)
@@ -91,8 +126,7 @@ func GetPostBase64Image(iconURL string) string {
 	encodedImage := base64.StdEncoding.EncodeToString(buf.Bytes())
 
 	// レスポンスボディにBase64エンコードされた画像データを含める
-	// response := fmt.Sprintf(`{"image": "%s"}`, encodedImage)
-	response := fmt.Sprintf("data:%s;base64,%s", getImageBase64(iconURL), encodedImage)
+	response := fmt.Sprintf("data:%s;base64,%s", getImageBase64(fileName), encodedImage)
 
 	return response
 }

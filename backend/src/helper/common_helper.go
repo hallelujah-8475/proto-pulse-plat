@@ -24,7 +24,7 @@ func ParseMultipart(r *http.Request) error {
 	return nil
 }
 
-func WriteResponse(w http.ResponseWriter, response map[string]interface{}) error {
+func WriteResponse(w http.ResponseWriter, response any) error {
 	w.Header().Set("Content-Type", "application/json")
 	return json.NewEncoder(w).Encode(response)
 }

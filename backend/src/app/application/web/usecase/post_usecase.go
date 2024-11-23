@@ -14,7 +14,7 @@ import (
 )
 
 type PostUsecase interface {
-	List(pageStr, perPageStr string) ([]map[string]interface{}, int64, int, int, error)
+	List(pageStr, perPageStr string) ([]entity.Post, int64, int, int, error)
 	Delete(postID int) error
 	Add(title, content, fileName string, userID uint) error
 	GetByID(postID int) (*entity.Post, error)
@@ -33,7 +33,7 @@ func NewPostUsecase(postRepo repository.PostRepository) PostUsecase {
 	}
 }
 
-func (u *postUsecase) List(pageStr, perPageStr string) ([]map[string]interface{}, int64, int, int, error) {
+func (u *postUsecase) List(pageStr, perPageStr string) ([]entity.Post, int64, int, int, error) {
 	page := 1
 	perPage := 8
 
@@ -57,49 +57,7 @@ func (u *postUsecase) List(pageStr, perPageStr string) ([]map[string]interface{}
 		return nil, 0, 0, 0, err
 	}
 
-	var response []entity.Post
-	for _, post := range posts {
-		response = append(response, entity.Post{
-			ID:        post.ID,
-			Title:     post.Title,
-			Content:   post.Content,
-			FileName:  post.FileName,
-			FilePath:  post.FilePath,
-			UserID:    post.UserID,
-			CreatedAt: post.CreatedAt,
-			UpdatedAt: post.UpdatedAt,
-			User: entity.User{
-				ID:        post.User.ID,
-				UserName:  post.User.UserName,
-				AccountID: post.User.AccountID,
-				IconURL:   post.User.IconURL,
-			},
-		})
-	}
-
-	var responsePosts []map[string]interface{}
-	for _, post := range response {
-		responsePost := map[string]interface{}{
-			"id":          post.ID,
-			"title":       post.Title,
-			"content":     post.Content,
-			"file_name":   post.FileName,
-			"file_path":   post.FilePath,
-			"file_base64": helper.GetPostBase64Image(post.FilePath),
-			"user_id":     post.UserID,
-			"user": map[string]interface{}{
-				"id":         post.User.ID,
-				"user_name":  post.User.UserName,
-				"account_id": post.User.AccountID,
-				"icon_url":   post.User.IconURL,
-			},
-			"created_at": post.CreatedAt,
-			"updated_at": post.UpdatedAt,
-		}
-		responsePosts = append(responsePosts, responsePost)
-	}
-
-	return responsePosts, totalCount, page, perPage, nil
+	return posts, totalCount, page, perPage, nil
 }
 
 func (u *postUsecase) Delete(postID int) error {
@@ -119,7 +77,7 @@ func (u *postUsecase) Add(title, content, fileName string, userID uint) error {
 		return errors.New("content cannot be empty")
 	}
 
-	if err := u.postRepo.Save(mapper.ToModel(title, content, fileName, userID)); err != nil {
+	if err := u.postRepo.Save(mapper.ToModelPost(title, content, fileName, userID)); err != nil {
 		return fmt.Errorf("failed to save post: %w", err)
 	}
 
@@ -137,7 +95,7 @@ func (u *postUsecase) GetByID(postID int) (*entity.Post, error) {
 		return nil, fmt.Errorf("failed to get post by ID: %w", err)
 	}
 
-	return mapper.ToEntity(post), nil
+	return mapper.ToEntityPost(post), nil
 }
 
 func (uc *postUsecase) Update(postID int, content, fileName string) error {

@@ -6,7 +6,7 @@ import (
 	"proto-pulse-plat/infrastructure/persistence/postgres"
 )
 
-func ToModel(title, content, fileName string, userID uint) model.Post {
+func ToModelPost(title, content, fileName string, userID uint) model.Post {
 	return model.Post{
 		Title:    title,
 		Content:  content,
@@ -15,13 +15,11 @@ func ToModel(title, content, fileName string, userID uint) model.Post {
 	}
 }
 
-func ToEntity(post postgres.Post) *entity.Post {
+func ToEntityPost(post postgres.Post) *entity.Post {
 	return &entity.Post{
 		ID:        post.ID,
 		Title:     post.Title,
 		Content:   post.Content,
-		FileName:  post.FileName,
-		FilePath:  post.FilePath,
 		UserID:    post.UserID,
 		CreatedAt: post.CreatedAt,
 		UpdatedAt: post.UpdatedAt,
@@ -29,7 +27,7 @@ func ToEntity(post postgres.Post) *entity.Post {
 			ID:        post.User.ID,
 			UserName:  post.User.UserName,
 			AccountID: post.User.AccountID,
-			IconURL:   post.User.IconURL,
+			IconFileName:   post.User.IconFileName,
 		},
 	}
 }

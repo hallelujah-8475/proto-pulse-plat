@@ -31,12 +31,18 @@ func main() {
 
 	xConfig := config.LoadXconfig()
 
-	certificationHandler := handler.NewCertificationHandler()
+	postsRepository := postgres.NewGormPostsRepository(db)
+	usersRepository := postgres.NewGormUsersRepository(db)
+	postImagesRepository := postgres.NewGormPostImagesRepository(db)
+
 	oauthUsecase := usecase.NewOAuthUseCase(xConfig)
+	postUsecase := usecase.NewPostUsecase(postsRepository)
+	userUsecase := usecase.NewUserUsecase(usersRepository)
+	postImageUsercase := usecase.NewPostImageUsecase(postImagesRepository)
+
+	certificationHandler := handler.NewCertificationHandler()
 	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase, xConfig)
-	postRepository := postgres.NewGormPostsRepository(db)
-	postUsecase := usecase.NewPostUsecase(postRepository)
-	postHandler := handler.NewPostHandler(postUsecase)
+	postHandler := handler.NewPostHandler(postUsecase,userUsecase,postImageUsercase)
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()

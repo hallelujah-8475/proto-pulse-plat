@@ -9,17 +9,22 @@ import (
 	"net/http"
 	"proto-pulse-plat/app/application/web/usecase"
 	"proto-pulse-plat/app/presentation/http/web/validation"
+	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/helper"
 	"strconv"
 )
 
 type PostHandler struct {
 	PostUsecase usecase.PostUsecase
+	UserUsecase usecase.UserUsecase
+	PostImageUsecase usecase.PostImageUsecase
 }
 
-func NewPostHandler(postUsecase usecase.PostUsecase) *PostHandler {
+func NewPostHandler(postUsecase usecase.PostUsecase, userUsecase usecase.UserUsecase, postImageUsecase usecase.PostImageUsecase) *PostHandler {
 	return &PostHandler{
 		PostUsecase: postUsecase,
+		UserUsecase: userUsecase,
+		PostImageUsecase: postImageUsecase,
 	}
 }
 
@@ -30,13 +35,33 @@ type DeletePostRequest struct {
 func (oc *PostHandler) GetPostList(w http.ResponseWriter, r *http.Request) {
 	pageStr, perPageStr := helper.PostListQueryParams(r)
 
-	responsePosts, totalCount, page, perPage, err := oc.PostUsecase.List(pageStr, perPageStr)
+	posts, totalCount, page, perPage, err := oc.PostUsecase.List(pageStr, perPageStr)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	
+	var users []entity.User
+	for _, post := range posts {
+		user, err := oc.UserUsecase.GetByID(post.UserID)
+		if err != nil {
+			fmt.Println("Error fetching user:", err)
+			continue
+		}
+		users = append(users, *user)
+	}
+	
+	postImagesMap := make(map[uint][]entity.PostImage)
+	for _, post := range posts {
+		postImages, err := oc.PostImageUsecase.GetByPostID(post.ID)
+		if err != nil {
+			fmt.Println("Error fetching post images:", err)
+			continue
+		}
+		postImagesMap[post.ID] = postImages
+	}
 
-	if err := helper.WriteResponse(w, helper.BuildPostListResponse(responsePosts, totalCount, page, perPage)); err != nil {
+	if err := helper.WriteResponse(w, helper.BuildPostListResponse(posts, users, postImagesMap, totalCount, page, perPage)); err != nil {
 		helper.WriteErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }

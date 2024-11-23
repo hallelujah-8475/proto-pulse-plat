@@ -17,10 +17,8 @@ type Post struct {
 	ID        uint   `gorm:"primaryKey"`
 	Title     string `gorm:"size:255"`
 	Content   string `gorm:"type:text"`
-	FileName  string `gorm:"size:255"`
-	FilePath  string `gorm:"size:255"`
 	UserID    uint   `gorm:"not null"`
-	User      Users  `gorm:"foreignKey:UserID"`
+	User      User  `gorm:"foreignKey:UserID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -48,7 +46,7 @@ func (r *GormPostsRepository) FindAllWithPagination(limit int, offset int) ([]en
 	var posts []entity.Post
 	var count int64
 
-	result := r.DB.Preload("User").Limit(limit).Offset(offset).Find(&posts)
+	result := r.DB.Limit(limit).Offset(offset).Find(&posts)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
