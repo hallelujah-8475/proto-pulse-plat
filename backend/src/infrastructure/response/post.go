@@ -1,5 +1,6 @@
 package response
 
+// 一覧画面用
 type Post struct {
 	ID              uint   `json:"id"`
 	Title           string `json:"title"`
@@ -15,4 +16,12 @@ type PostList struct {
 	TotalCount int64  `json:"total_count"`
 	Page       int    `json:"page"`
 	PerPage    int    `json:"per_page"`
+}
+
+// 詳細画面用
+type PostDetail struct {
+	ID              uint   `json:"id"`
+	Title           string `json:"title"`
+	Content         string `json:"content"`
+	PostImagesBase64 []string `json:"post_images_base64"`
 }

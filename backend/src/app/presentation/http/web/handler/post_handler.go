@@ -150,13 +150,9 @@ func (oc *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// postImages, err := oc.PostUsecase.GetPostImages(postID)
-	// if err != nil {
-	// 	http.Error(w, "GetPostImages error", http.StatusBadRequest)
-	// 	return
-	// }
+	postImages, err := oc.PostImageUsecase.GetByPostID(post.ID)
 
-	if err := helper.WriteResponse(w, helper.BuildPostResponse(post)); err != nil {
+	if err := helper.WriteResponse(w, helper.BuildPostResponse(post, postImages)); err != nil {
 		helper.WriteErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
 	}
 }

@@ -79,23 +79,22 @@ func BuildPostListResponse(
 	}
 }
 
-func BuildPostResponse(post *entity.Post) map[string]interface{} {
-	return map[string]interface{}{
-		"id":        post.ID,
-		"title":     post.Title,
-		"content":   post.Content,
-		"file_name": post.FileName,
-		"file_path": post.FilePath,
-		"user_id":   post.UserID,
-		"user": map[string]interface{}{
-			"id":             post.User.ID,
-			"user_name":      post.User.UserName,
-			"account_id":     post.User.AccountID,
-			"icon_file_name": post.User.IconFileName,
-		},
-		"created_at": post.CreatedAt,
-		"updated_at": post.UpdatedAt,
+func BuildPostResponse(post *entity.Post, postImages []entity.PostImage) response.PostDetail {
+	var postImagesBase64 []string
+	
+	for _, postImage := range postImages {
+		base64Image := GetPostBase64Image(postImage.FileName)
+		postImagesBase64 = append(postImagesBase64, base64Image)
 	}
+
+	responsePost := response.PostDetail{
+		ID:              post.ID,
+		Title:           post.Title,
+		Content:         post.Content,
+		PostImagesBase64: postImagesBase64,
+	}
+
+	return responsePost
 }
 
 func GetPostBase64Image(fileName string) string {

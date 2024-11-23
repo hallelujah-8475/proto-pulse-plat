@@ -6,9 +6,10 @@ import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
 
 interface PostDetail {
+  id: number;
   title: string;
   content: string;
-  fileUrl: string | null;
+  post_images_base64: string[];
 }
 
 const PostDetailPage: React.FC = () => {
@@ -17,9 +18,10 @@ const PostDetailPage: React.FC = () => {
   const postId = searchParams.get("post_id");
 
   const [postDetail, setPostDetail] = useState<PostDetail>({
+    id: 0,
     title: "",
     content: "",
-    fileUrl: null,
+    post_images_base64: [],
   });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
@@ -27,15 +29,16 @@ const PostDetailPage: React.FC = () => {
 
   useEffect(() => {
     const fetchPostDetail = async () => {
-      const post_URL = `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`;
       try {
+        const post_URL = `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`;
         const response = await fetch(post_URL);
         if (response.ok) {
-          const post = await response.json();
+          const postDetail = await response.json();
           setPostDetail({
-            title: post.title,
-            content: post.content,
-            fileUrl: post.file_url || null,
+            id: postDetail.id,
+            title: postDetail.title,
+            content: postDetail.content,
+            post_images_base64: postDetail.post_images_base64,
           });
         } else {
           setError("投稿の詳細を取得できませんでした");
@@ -53,23 +56,15 @@ const PostDetailPage: React.FC = () => {
     }
   }, [postId]);
 
-  const images = [
-    "https://loremflickr.com/800/600/girl",
-    "https://loremflickr.com/800/600/dog",
-    "https://loremflickr.com/800/600/girl",
-    "https://loremflickr.com/800/600/dog",
-    "https://loremflickr.com/800/600/girl",
-  ];
-
   const handlePrevSlide = () => {
     setCurrentSlide((prevSlide) =>
-      prevSlide === 0 ? images.length - 1 : prevSlide - 1
+      prevSlide === 0 ? postDetail.post_images_base64.length - 1 : prevSlide - 1
     );
   };
 
   const handleNextSlide = () => {
     setCurrentSlide((prevSlide) =>
-      prevSlide === images.length - 1 ? 0 : prevSlide + 1
+      prevSlide === postDetail.post_images_base64.length - 1 ? 0 : prevSlide + 1
     );
   };
 
@@ -91,7 +86,7 @@ const PostDetailPage: React.FC = () => {
                 {/* Carousel wrapper */}
                 <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
                   <img
-                    src={images[currentSlide]}
+                    src={postDetail.post_images_base64[currentSlide]}
                     className="w-full h-full object-cover"
                     alt="carousel image"
                   />
@@ -147,20 +142,6 @@ const PostDetailPage: React.FC = () => {
                   </span>
                 </button>
               </div>
-
-              {postDetail.fileUrl && (
-                <div className="mt-4">
-                  <p className="font-bold">ファイル:</p>
-                  <a
-                    href={postDetail.fileUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-indigo-600 hover:underline"
-                  >
-                    {postDetail.fileUrl}
-                  </a>
-                </div>
-              )}
               <button
                 onClick={() => router.push("/edit?post_id=" + postId)}
                 className="mt-5 bg-indigo-600 hover:bg-indigo-400 text-white py-2 px-4 rounded"
