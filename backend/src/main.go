@@ -41,7 +41,7 @@ func main() {
 	postImageUsercase := usecase.NewPostImageUsecase(postImagesRepository)
 
 	certificationHandler := handler.NewCertificationHandler()
-	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase, xConfig)
+	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase, userUsecase, xConfig)
 	postHandler := handler.NewPostHandler(postUsecase, userUsecase, postImageUsercase)
 
 	r := mux.NewRouter()

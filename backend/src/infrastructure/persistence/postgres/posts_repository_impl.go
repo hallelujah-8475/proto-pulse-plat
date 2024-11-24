@@ -18,7 +18,7 @@ type Post struct {
 	Title     string `gorm:"size:255"`
 	Content   string `gorm:"type:text"`
 	UserID    uint   `gorm:"not null"`
-	User      User   `gorm:"foreignKey:UserID"`
+	// User      User   `gorm:"foreignKey:UserID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"errors"
 	"fmt"
 	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/domain/repository"
@@ -9,6 +10,7 @@ import (
 
 type UserUsecase interface {
 	GetByID(userID uint) (*entity.User, error)
+	Add(userName, accountID, iconFileName string) error
 }
 
 type userUsecase struct {
@@ -33,4 +35,17 @@ func (u *userUsecase) GetByID(userID uint) (*entity.User, error) {
 	}
 
 	return mapper.ToEntityUser(user), nil
+}
+
+func (u *userUsecase) Add(userName, accountID, iconFileName string) error {
+	if userName == "" {
+		return errors.New("userName cannot be empty")
+	}
+
+	err := u.userRepo.Save(mapper.ToModelUser(userName, accountID, iconFileName))
+	if err != nil {
+		return fmt.Errorf("failed to save user: %w", err)
+	}
+
+	return nil
 }

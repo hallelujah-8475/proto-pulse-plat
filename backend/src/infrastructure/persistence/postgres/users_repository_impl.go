@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"proto-pulse-plat/infrastructure/model"
 	"time"
 
 	"gorm.io/gorm"
@@ -18,7 +19,7 @@ type User struct {
 	IconFileName string `gorm:"size:255"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	Posts        []Post `gorm:"foreignKey:UserID"`
+	// Posts        []Post `gorm:"foreignKey:UserID"`
 }
 
 func NewGormUsersRepository(db *gorm.DB) *GormUsersRepository {
@@ -39,4 +40,13 @@ func (r *GormUsersRepository) Find(id uint) (User, error) {
 	}
 
 	return user, nil
+}
+
+func (r *GormUsersRepository) Save(user model.User) error {
+	result := r.DB.Create(&user)
+	if result.Error != nil {
+		return fmt.Errorf("failed to save users: %w", result.Error)
+	}
+
+	return nil
 }

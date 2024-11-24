@@ -64,7 +64,7 @@ func BuildPostListResponse(
 			Content:         post.Content,
 			PostImageBase64: postImageBase64,
 			UserName:        user.UserName,
-			AccountID:       user.ID,
+			AccountID:       user.AccountID,
 			IconImageBase64: GetPostBase64Image(user.IconFileName), // UserにIconImageBase64があると仮定
 		}
 		responsePosts = append(responsePosts, responsePost)
@@ -81,7 +81,7 @@ func BuildPostListResponse(
 
 func BuildPostResponse(post *entity.Post, postImages []entity.PostImage) response.PostDetail {
 	var postImagesBase64 []string
-	
+
 	for _, postImage := range postImages {
 		base64Image := GetPostBase64Image(postImage.FileName)
 		postImagesBase64 = append(postImagesBase64, base64Image)
@@ -126,8 +126,14 @@ func GetPostBase64Image(fileName string) string {
 		return ""
 	}
 
+	decryptedImage, err := decrypt(buf.Bytes(), "thisis16byteskey")
+	if err != nil {
+		log.Println("decrypt is error")
+		return ""
+	}
+
 	// 画像データをBase64エンコード
-	encodedImage := base64.StdEncoding.EncodeToString(buf.Bytes())
+	encodedImage := base64.StdEncoding.EncodeToString(decryptedImage)
 
 	// レスポンスボディにBase64エンコードされた画像データを含める
 	response := fmt.Sprintf("data:%s;base64,%s", getImageBase64(fileName), encodedImage)
@@ -257,4 +263,36 @@ func createKey(passPhrase string) []byte {
 		key = key[:32]
 	}
 	return key
+}
+
+// AES復号化
+func decrypt(data []byte, passphrase string) ([]byte, error) {
+	// AESブロック暗号を生成
+	block, err := aes.NewCipher([]byte(passphrase))
+	if err != nil {
+		return nil, err
+	}
+
+	// Galois/Counter Mode (GCM) を使用するためのインターフェースを生成
+	gcm, err := cipher.NewGCM(block)
+	if err != nil {
+		return nil, err
+	}
+
+	// GCMのNonce (Number used once) サイズを取得
+	nonceSize := gcm.NonceSize()
+	if len(data) < nonceSize {
+		return nil, fmt.Errorf("ciphertext too short")
+	}
+
+	// Nonceと暗号文を分割
+	nonce, ciphertext := data[:nonceSize], data[nonceSize:]
+
+	// データを復号化し、プレーンテキストを生成
+	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return plaintext, nil
 }

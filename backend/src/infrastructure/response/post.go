@@ -7,7 +7,7 @@ type Post struct {
 	Content         string `json:"content"`
 	PostImageBase64 string `json:"post_image_base64"`
 	UserName        string `json:"user_name"`
-	AccountID       uint   `json:"account_id"`
+	AccountID       string   `json:"account_id"`
 	IconImageBase64 string `json:"icon_image_base64"`
 }
 

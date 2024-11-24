@@ -17,11 +17,13 @@ import (
 
 type OAuthClient struct {
 	OauthUsecase usecase.OAuthUsecase
+	UserUsecase usecase.UserUsecase
 }
 
-func NewOAuthClient(oauthUsecase usecase.OAuthUsecase, xConfig *config.Xconfig) *OAuthClient {
+func NewOAuthClient(oauthUsecase usecase.OAuthUsecase, userUsecase usecase.UserUsecase, xConfig *config.Xconfig) *OAuthClient {
 	return &OAuthClient{
 		OauthUsecase: oauthUsecase,
+		UserUsecase: userUsecase,
 	}
 }
 
@@ -104,6 +106,12 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		HttpOnly: true,
 		Secure:   false, // 本番環境では true にする
 	})
+
+	err = oc.UserUsecase.Add(profile.ScreenName, profile.Name, "")
+	if err != nil {
+		log.Println("user Add error")
+		return
+	}
 
 	// リダイレクトURLの作成とリダイレクト
 	redirectURL := fmt.Sprintf("%s:%s", os.Getenv("BASE_HTTPS_URL"), os.Getenv("WEB_PORT"))
