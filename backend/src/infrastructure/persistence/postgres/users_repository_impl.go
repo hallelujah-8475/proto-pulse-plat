@@ -42,11 +42,18 @@ func (r *GormUsersRepository) Find(id uint) (User, error) {
 	return user, nil
 }
 
-func (r *GormUsersRepository) Save(user model.User) error {
-	result := r.DB.Create(&user)
-	if result.Error != nil {
-		return fmt.Errorf("failed to save users: %w", result.Error)
+func (r *GormUsersRepository) Save(user model.User) (User, error) {
+	newUser := User{
+		UserName:     user.UserName,
+		AccountID:    user.AccountID,
+		IconFileName: user.IconFileName,
 	}
 
-	return nil
+	result := r.DB.Create(&newUser)
+	if result.Error != nil {
+		return User{}, fmt.Errorf("failed to save user: %w", result.Error)
+	}
+
+	return newUser, nil
 }
+

@@ -7,5 +7,5 @@ import (
 
 type UsersRepository interface {
 	Find(id uint) (postgres.User, error)
-	Save(model.User) error
+	Save(model.User) (postgres.User, error)
 }

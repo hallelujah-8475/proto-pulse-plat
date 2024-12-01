@@ -1,58 +1,63 @@
 "use client";
 
-import React, { useState } from "react";
 import axios from "axios";
 
-interface UserProfile {
-  name: string;
-  screen_name: string;
-  profile_image_url_https: string;
-}
-
 export const Header: React.FC = () => {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const fetchOAuthURL = async (): Promise<string | null> => {
+    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
+    if (!oauthURL) {
+      console.error("OAuth URL is not defined");
+      return null;
+    }
+
+    try {
+      const response = await axios.get(oauthURL, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200 && response.data.redirectURL) {
+        return response.data.redirectURL;
+      } else {
+        console.error("Redirect URL is not available");
+        return null;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error during OAuth request:", error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+      return null;
+    }
+  };
+
+  const fetchCertification = async (): Promise<void> => {
+    const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/certification`;
+
+    try {
+      const response = await axios.get(fetchURL, {
+        withCredentials: true,
+      });
+      localStorage.setItem("profile", JSON.stringify(response));
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error fetching certification:", error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+    }
+  };
 
   const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
-    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
+    const redirectURL = await fetchOAuthURL();
+    if (!redirectURL) return;
 
-    if (oauthURL) {
-      try {
-        const response = await axios.get(oauthURL, {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (response.status === 200 && response.data.redirectURL) {
-          const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/certification`;
-          try {
-            const response = await axios.get(fetchURL, {
-              withCredentials: true,
-            });
-            localStorage.setItem("profile", JSON.stringify(response));
-          } catch (error) {
-            if (axios.isAxiosError(error)) {
-              console.error("Error fetching certification:", error.message);
-            } else {
-              console.error("Unexpected error:", error);
-            }
-          }
-          window.location.href = response.data.redirectURL;
-        } else {
-          console.error("Redirect URL is not available");
-        }
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.error("Error during OAuth request:", error.message);
-        } else {
-          console.error("Unexpected error:", error);
-        }
-      }
-    } else {
-      console.error("OAuth URL is not defined");
-    }
+    await fetchCertification();
+    window.location.href = redirectURL;
   };
 
   return (

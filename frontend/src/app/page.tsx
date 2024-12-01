@@ -8,20 +8,11 @@ import { Footer } from "./components/Footer";
 import "flowbite"; // 必須
 
 interface UserProfile {
+  id: number;
   name: string;
   screen_name: string;
   profile_image_url_https: string;
 }
-
-// type User = {
-//   id: number;
-//   user_name: string;
-//   account_id: string;
-//   icon_file_name: string;
-//   created_at: string;
-//   updated_at: string;
-// };
-
 type Post = {
   id: number;
   title: string;

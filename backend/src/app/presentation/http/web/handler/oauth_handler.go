@@ -11,7 +11,7 @@ import (
 	"proto-pulse-plat/app/application/web/usecase"
 	"proto-pulse-plat/config"
 	"proto-pulse-plat/helper"
-	"proto-pulse-plat/infrastructure/model"
+	"proto-pulse-plat/infrastructure/response"
 	"time"
 )
 
@@ -84,14 +84,20 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var profile model.UserProfile
+	var profile response.UserProfile
 	if err := json.Unmarshal(body, &profile); err != nil {
 		fmt.Println("Error parsing JSON:", err)
 		http.Error(w, "Failed to parse JSON response", http.StatusInternalServerError)
 		return
 	}
 
-	tokenString, err := helper.GenerateJWT(profile)
+	user, err := oc.UserUsecase.Add(profile.ScreenName, profile.Name, "")
+	if err != nil {
+		log.Println("user Add error")
+		return
+	}
+
+	tokenString, err := helper.GenerateJWT(profile, *user)
 	if err != nil {
 		fmt.Println("Error generating JWT:", err)
 		http.Error(w, "Failed to generate JWT", http.StatusInternalServerError)
@@ -107,13 +113,6 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		Secure:   false, // 本番環境では true にする
 	})
 
-	err = oc.UserUsecase.Add(profile.ScreenName, profile.Name, "")
-	if err != nil {
-		log.Println("user Add error")
-		return
-	}
-
-	// リダイレクトURLの作成とリダイレクト
 	redirectURL := fmt.Sprintf("%s:%s", os.Getenv("BASE_HTTPS_URL"), os.Getenv("WEB_PORT"))
 	http.Redirect(w, r, redirectURL, http.StatusSeeOther)
 }

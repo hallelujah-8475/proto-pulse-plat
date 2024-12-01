@@ -9,7 +9,8 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"proto-pulse-plat/infrastructure/model"
+	"proto-pulse-plat/domain/entity"
+	"proto-pulse-plat/infrastructure/response"
 	"sort"
 	"strings"
 	"time"
@@ -61,11 +62,12 @@ func EncodeParameters(params url.Values) string {
 }
 
 // JWTを生成する関数
-func GenerateJWT(profile model.UserProfile) (string, error) {
+func GenerateJWT(profile response.UserProfile, user entity.User) (string, error) {
 	expirationTime := time.Now().Add(24 * time.Hour)
 
 	// クレームを作成
 	claims := jwt.MapClaims{
+		"id":              user.ID,
 		"name":              profile.Name,
 		"screen_name":       profile.ScreenName,
 		"profile_image_url": profile.ProfileImageUrl,

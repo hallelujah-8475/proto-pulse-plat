@@ -34,7 +34,6 @@ func (ch *CertificationHandler) Certificate(w http.ResponseWriter, r *http.Reque
 
 	parts := strings.Split(tokenStr, ".")
 	if len(parts) != 3 {
-		fmt.Println("Invalid token format:", tokenStr)
 		http.Error(w, "Invalid token format", http.StatusUnauthorized)
 		return
 	}
@@ -52,7 +51,11 @@ func (ch *CertificationHandler) Certificate(w http.ResponseWriter, r *http.Reque
 		http.Error(w, "Invalid token", http.StatusUnauthorized)
 		return
 	}
-
+	id, ok := (*claims)["id"].(float64)
+	if !ok {
+		http.Error(w, "Invalid id claim", http.StatusUnauthorized)
+		return
+	}
 	name, ok := (*claims)["name"].(string)
 	if !ok {
 		http.Error(w, "Invalid name claim", http.StatusUnauthorized)
@@ -70,6 +73,7 @@ func (ch *CertificationHandler) Certificate(w http.ResponseWriter, r *http.Reque
 	}
 
 	profile := model.UserProfile{
+		ID: id,
 		Name:            name,
 		ScreenName:      screenName,
 		ProfileImageUrl: profileImageUrl,

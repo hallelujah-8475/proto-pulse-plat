@@ -20,6 +20,7 @@ func (oc *OAuthClient) UserProfile(w http.ResponseWriter, r *http.Request) {
 	}
 
 	profile := model.UserProfile{
+		ID: session.Values["id"].(float64),
 		Name:            session.Values["name"].(string),
 		ScreenName:      session.Values["screen_name"].(string),
 		ProfileImageUrl: session.Values["profile_image_url_https"].(string),

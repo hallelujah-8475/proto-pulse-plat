@@ -10,7 +10,7 @@ import (
 
 type UserUsecase interface {
 	GetByID(userID uint) (*entity.User, error)
-	Add(userName, accountID, iconFileName string) error
+	Add(userName, accountID, iconFileName string) (*entity.User, error)
 }
 
 type userUsecase struct {
@@ -37,15 +37,15 @@ func (u *userUsecase) GetByID(userID uint) (*entity.User, error) {
 	return mapper.ToEntityUser(user), nil
 }
 
-func (u *userUsecase) Add(userName, accountID, iconFileName string) error {
+func (u *userUsecase) Add(userName, accountID, iconFileName string) (*entity.User, error) {
 	if userName == "" {
-		return errors.New("userName cannot be empty")
+		return nil, errors.New("userName cannot be empty")
 	}
 
-	err := u.userRepo.Save(mapper.ToModelUser(userName, accountID, iconFileName))
+	user, err := u.userRepo.Save(mapper.ToModelUser(userName, accountID, iconFileName))
 	if err != nil {
-		return fmt.Errorf("failed to save user: %w", err)
+		return nil, errors.New("failed to save user")
 	}
 
-	return nil
+	return mapper.ToEntityUser(user), nil
 }
