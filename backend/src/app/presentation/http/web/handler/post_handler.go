@@ -111,13 +111,19 @@ func (oc *PostHandler) AddPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	title, content, files, err := validation.ValidateFormInputs(r)
+	id, title, content, files, err := validation.ValidateFormInputs(r)
 	if err != nil {
 		helper.WriteErrorResponse(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	addedPost, err := oc.PostUsecase.Add(title, content, 10)
+	uint64ID, err := strconv.ParseUint(id, 10, 32) // 第2引数: 数値の基数、第3引数: ビットサイズ
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+
+	addedPost, err := oc.PostUsecase.Add(title, content, uint(uint64ID))
 	if err != nil {
 		helper.WriteErrorResponse(w, "Failed to add post", http.StatusInternalServerError)
 		return

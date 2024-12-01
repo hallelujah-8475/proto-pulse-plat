@@ -49,7 +49,6 @@ func main() {
 	apiRouter.HandleFunc("/certification", certificationHandler.Certificate)
 	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthCertificate)
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.OauthCallback)
-	apiRouter.HandleFunc("/user/profile", oauthClientHandler.UserProfile)
 	postRouter := apiRouter.PathPrefix("/post").Subrouter()
 	postRouter.HandleFunc("/add", postHandler.AddPost)
 	postRouter.HandleFunc("/delete", postHandler.DeletePost)

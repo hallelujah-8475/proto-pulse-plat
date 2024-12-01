@@ -79,26 +79,6 @@ export default function Home() {
     }
   };
 
-  // const fetchUserProfile = async () => {
-  //   try {
-  //     const userProfileURL = process.env.NEXT_PUBLIC_API_URL + "/user/profile";
-
-  //     const response = await fetch(userProfileURL, {
-  //       method: "GET",
-  //       credentials: "include",
-  //     });
-
-  //     if (!response.ok) {
-  //       throw new Error("Failed to fetch user profile");
-  //     }
-
-  //     const data: UserProfile = await response.json();
-  //     setProfile(data);
-  //   } catch (error) {
-  //     console.error("Error fetching user profile:", error);
-  //   }
-  // };
-
   const fetchPosts = async () => {
     try {
       const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/post/list?page=${paging.page}&limit=${paging.per_page}`;
@@ -167,7 +147,6 @@ export default function Home() {
 
   // ローカルストレージからプロファイルを取得する関数
   const loadProfileFromLocalStorage = () => {
-    console.log("loadProfileFromLocalStorage start");
     try {
       const profile = localStorage.getItem("profile");
       if (profile) {
@@ -214,26 +193,7 @@ export default function Home() {
     setShowModal(true);
   };
 
-  // const testJWT = async () => {
-  //   const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/certification`;
-
-  //   try {
-  //     const response = await axios.get(fetchURL, {
-  //       withCredentials: true,
-  //     });
-  //     setProfile(response.data);
-  //     alert(profile);
-  //   } catch (error) {
-  //     if (axios.isAxiosError(error)) {
-  //       console.error("Error fetching certification:", error.message);
-  //     } else {
-  //       console.error("Unexpected error:", error);
-  //     }
-  //   }
-  // };
-
   useLayoutEffect(() => {
-    // fetchUserProfile();
     loadProfileFromLocalStorage();
     fetchPosts();
   }, [paging.page, paging.per_page]);
@@ -244,7 +204,6 @@ export default function Home() {
     <>
       <Header />
       {/* モーダル */}
-
       <div
         id="popup-modal"
         tabIndex={-1}

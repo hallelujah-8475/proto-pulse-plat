@@ -7,7 +7,7 @@ import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
 
 interface UserProfile {
-  id: number;
+  id: string;
   name: string;
   screen_name: string;
   profile_image_url_https: string;
@@ -52,6 +52,7 @@ const PostPage: React.FC = () => {
   const handleFinalSubmit = async () => {
     const values = getValues();
     const data = new FormData();
+    data.append("id", profile != null ? profile.id : "");
     data.append("title", values.title);
     data.append("content", values.content);
 
@@ -81,7 +82,6 @@ const PostPage: React.FC = () => {
 
   // ローカルストレージからプロファイルを取得する関数
   const loadProfileFromLocalStorage = () => {
-    console.log("loadProfileFromLocalStorage start");
     try {
       const profile = localStorage.getItem("profile");
       if (profile) {
