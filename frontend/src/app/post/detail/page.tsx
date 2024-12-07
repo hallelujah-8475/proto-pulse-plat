@@ -143,7 +143,7 @@ const PostDetailPage: React.FC = () => {
                 </button>
               </div>
               <button
-                onClick={() => router.push("/edit?post_id=" + postId)}
+                onClick={() => router.push("/post/edit?post_id=" + postId)}
                 className="mt-5 bg-indigo-600 hover:bg-indigo-400 text-white py-2 px-4 rounded"
               >
                 編集

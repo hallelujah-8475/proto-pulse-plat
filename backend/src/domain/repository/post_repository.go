@@ -3,13 +3,12 @@ package repository
 import (
 	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/infrastructure/model"
-	"proto-pulse-plat/infrastructure/persistence/postgres"
 )
 
 type PostRepository interface {
 	Delete(postID int) error
 	FindAllWithPagination(limit int, offset int) ([]entity.Post, int64, error)
-	Save(model.Post) (postgres.Post, error)
-	FindByID(postID int) (postgres.Post, error)
+	Save(model.Post) (*entity.Post, error)
+	FindByID(postID int) (*entity.Post, error)
 	Update(model.Post) error
 }

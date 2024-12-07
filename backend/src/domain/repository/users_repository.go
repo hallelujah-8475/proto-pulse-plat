@@ -1,11 +1,11 @@
 package repository
 
 import (
+	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/infrastructure/model"
-	"proto-pulse-plat/infrastructure/persistence/postgres"
 )
 
 type UsersRepository interface {
-	Find(id uint) (postgres.User, error)
-	Save(model.User) (postgres.User, error)
+	Find(id uint) (*entity.User, error)
+	Save(model.User) (*entity.User, error)
 }

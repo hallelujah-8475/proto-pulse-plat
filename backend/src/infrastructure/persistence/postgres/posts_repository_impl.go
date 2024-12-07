@@ -18,9 +18,19 @@ type Post struct {
 	Title     string `gorm:"size:255"`
 	Content   string `gorm:"type:text"`
 	UserID    uint   `gorm:"not null"`
-	// User      User   `gorm:"foreignKey:UserID"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+func ToEntityPost(post Post) *entity.Post {
+	return &entity.Post{
+		ID:        post.ID,
+		Title:     post.Title,
+		Content:   post.Content,
+		UserID:    post.UserID,
+		CreatedAt: post.CreatedAt,
+		UpdatedAt: post.UpdatedAt,
+	}
 }
 
 func NewGormPostsRepository(db *gorm.DB) *GormPostsRepository {
@@ -46,7 +56,7 @@ func (r *GormPostsRepository) FindAllWithPagination(limit int, offset int) ([]en
 	var posts []entity.Post
 	var count int64
 
-	result := r.DB.Limit(limit).Offset(offset).Find(&posts)
+	result := r.DB.Order("updated_at DESC").Limit(limit).Offset(offset).Find(&posts)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
@@ -57,7 +67,7 @@ func (r *GormPostsRepository) FindAllWithPagination(limit int, offset int) ([]en
 }
 
 
-func (r *GormPostsRepository) Save(post model.Post) (Post, error) {
+func (r *GormPostsRepository) Save(post model.Post) (*entity.Post, error) {
 	newPost := Post{
 		Title:   post.Title,
 		Content: post.Content,
@@ -66,25 +76,25 @@ func (r *GormPostsRepository) Save(post model.Post) (Post, error) {
 
 	result := r.DB.Create(&newPost)
 	if result.Error != nil {
-		return Post{}, fmt.Errorf("failed to save post: %w", result.Error)
+		return nil, fmt.Errorf("failed to save post: %w", result.Error)
 	}
 
-	return newPost, nil
+	return ToEntityPost(newPost), nil
 }
 
 
-func (r *GormPostsRepository) FindByID(postID int) (Post, error) {
+func (r *GormPostsRepository) FindByID(postID int) (*entity.Post, error) {
 	var post Post
 
-	result := r.DB.Debug().Preload("User").First(&post, postID)
+	result := r.DB.Debug().First(&post, postID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return Post{}, fmt.Errorf("post not found with id: %d", postID)
+			return nil, fmt.Errorf("post not found with id: %d", postID)
 		}
-		return Post{}, fmt.Errorf("failed to retrieve post by ID: %w", result.Error)
+		return nil, fmt.Errorf("failed to retrieve post by ID: %w", result.Error)
 	}
 
-	return post, nil
+	return ToEntityPost(post), nil
 }
 
 func (r *GormPostsRepository) Update(post model.Post) error {

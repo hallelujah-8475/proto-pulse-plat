@@ -1,96 +1,41 @@
 package handler
 
 import (
-	"encoding/json"
-	"fmt"
-	"io"
-	"log"
-	"mime/multipart"
 	"net/http"
 	"proto-pulse-plat/app/application/web/usecase"
-	"proto-pulse-plat/app/presentation/http/web/validation"
-	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/helper"
-	"strconv"
 )
 
 type PostHandler struct {
 	PostUsecase      usecase.PostUsecase
 	UserUsecase      usecase.UserUsecase
-	PostImageUsecase usecase.PostImageUsecase
 }
 
 func NewPostHandler(
 	postUsecase usecase.PostUsecase,
 	userUsecase usecase.UserUsecase,
-	postImageUsecase usecase.PostImageUsecase,
 ) *PostHandler {
 	return &PostHandler{
 		PostUsecase:      postUsecase,
 		UserUsecase:      userUsecase,
-		PostImageUsecase: postImageUsecase,
 	}
-}
-
-type DeletePostRequest struct {
-	PostID int `json:"post_id"`
 }
 
 func (oc *PostHandler) GetPostList(w http.ResponseWriter, r *http.Request) {
-	pageStr, perPageStr := helper.PostListQueryParams(r)
-
-	posts, totalCount, page, perPage, err := oc.PostUsecase.List(pageStr, perPageStr)
+	postList, err := oc.PostUsecase.List(r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
+		helper.WriteErrorResponse(w, "Failed GetPostList", http.StatusInternalServerError)
 	}
-
-	var users []entity.User
-	for _, post := range posts {
-		user, err := oc.UserUsecase.GetByID(post.UserID)
-		if err != nil {
-			fmt.Println("Error fetching user:", err)
-			continue
-		}
-		users = append(users, *user)
-	}
-
-	postImagesMap := make(map[uint][]entity.PostImage)
-	for _, post := range posts {
-		postImages, err := oc.PostImageUsecase.GetByPostID(post.ID)
-		if err != nil {
-			fmt.Println("Error fetching post images:", err)
-			continue
-		}
-		postImagesMap[post.ID] = postImages
-	}
-
-	if err := helper.WriteResponse(w, helper.BuildPostListResponse(posts, users, postImagesMap, totalCount, page, perPage)); err != nil {
-		helper.WriteErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
+	
+	err = helper.WriteResponse(w, postList)
+	if err != nil {
+		helper.WriteErrorResponse(w, "Failed WriteResponse", http.StatusInternalServerError)
 	}
 }
 
 func (oc *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
-	err := helper.ValidateMethod(r, http.MethodPost)
+	err := oc.PostUsecase.Delete(r)
 	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	body, err := io.ReadAll(r.Body)
-	if err != nil {
-		http.Error(w, "Failed to read request body", http.StatusBadRequest)
-		return
-	}
-	defer r.Body.Close()
-
-	var req DeletePostRequest
-	if err := json.Unmarshal(body, &req); err != nil {
-		http.Error(w, "Invalid request payload", http.StatusBadRequest)
-		return
-	}
-
-	if err := oc.PostUsecase.Delete(req.PostID); err != nil {
 		http.Error(w, "Failed to delete post", http.StatusInternalServerError)
 		return
 	}
@@ -99,45 +44,9 @@ func (oc *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (oc *PostHandler) AddPost(w http.ResponseWriter, r *http.Request) {
-	err := helper.ValidateMethod(r, http.MethodPost)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	err = helper.ParseMultipart(r)
-	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	id, title, content, files, err := validation.ValidateFormInputs(r)
-	if err != nil {
-		helper.WriteErrorResponse(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	uint64ID, err := strconv.ParseUint(id, 10, 32) // 第2引数: 数値の基数、第3引数: ビットサイズ
-	if err != nil {
-		fmt.Println("Error:", err)
-		return
-	}
-
-	addedPost, err := oc.PostUsecase.Add(title, content, uint(uint64ID))
+	err := oc.PostUsecase.Add(r)
 	if err != nil {
 		helper.WriteErrorResponse(w, "Failed to add post", http.StatusInternalServerError)
-		return
-	}
-
-	err = oc.PostUsecase.FileUploads(files)
-	if err != nil {
-		helper.WriteErrorResponse(w, "Failed to upload files", http.StatusInternalServerError)
-		return
-	}
-
-	err = oc.PostImageUsecase.Add(files, addedPost.ID)
-	if err != nil {
-		helper.WriteErrorResponse(w, "Failed to postImage add", http.StatusInternalServerError)
 		return
 	}
 
@@ -145,82 +54,21 @@ func (oc *PostHandler) AddPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (oc *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
-	postIDStr := r.URL.Query().Get("post_id")
-	if postIDStr == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
-		return
-	}
-
-	postID, err := strconv.Atoi(postIDStr)
+	postDetail, err := oc.PostUsecase.GetPost(r)
 	if err != nil {
-		http.Error(w, "Invalid Post ID", http.StatusBadRequest)
-		return
+		helper.WriteErrorResponse(w, "Failed GetPost", http.StatusInternalServerError)
 	}
 
-	post, err := oc.PostUsecase.GetByID(postID)
+	err = helper.WriteResponse(w, postDetail)
 	if err != nil {
-		http.Error(w, "Post not found", http.StatusNotFound)
-		return
-	}
-
-	postImages, err := oc.PostImageUsecase.GetByPostID(post.ID)
-
-	if err := helper.WriteResponse(w, helper.BuildPostResponse(post, postImages)); err != nil {
-		helper.WriteErrorResponse(w, "Failed to encode response", http.StatusInternalServerError)
+		helper.WriteErrorResponse(w, "Failed WriteResponse", http.StatusInternalServerError)
 	}
 }
 
 func (oc *PostHandler) UpdatePost(w http.ResponseWriter, r *http.Request) {
-	err := helper.ValidateMethod(r, http.MethodPut)
+	err := oc.PostUsecase.Update(r)
 	if err != nil {
-		log.Println(err)
-		return
-	}
-
-	postIDStr := r.URL.Query().Get("post_id")
-	if postIDStr == "" {
-		http.Error(w, "Post ID is required", http.StatusBadRequest)
-		return
-	}
-
-	postID, err := strconv.Atoi(postIDStr)
-	if err != nil {
-		http.Error(w, "Invalid Post ID format", http.StatusBadRequest)
-		return
-	}
-
-	err = r.ParseMultipartForm(10 << 20)
-	if err != nil {
-		http.Error(w, "Failed to parse form data", http.StatusBadRequest)
-		return
-	}
-
-	content := r.FormValue("content")
-	if content == "" {
-		http.Error(w, "Content is required", http.StatusBadRequest)
-		return
-	}
-
-	var file multipart.File
-	var fileHeader *multipart.FileHeader
-	file, fileHeader, err = r.FormFile("file")
-	if err != nil && err != http.ErrMissingFile {
-		http.Error(w, "Failed to read file", http.StatusBadRequest)
-		return
-	}
-
-	if fileHeader != nil {
-		defer file.Close()
-
-		if fileHeader == nil {
-			http.Error(w, "No file uploaded", http.StatusBadRequest)
-			return
-		}
-		fmt.Println("File uploaded:", fileHeader.Filename)
-	}
-
-	if err := oc.PostUsecase.Update(postID, content, ""); err != nil {
-		http.Error(w, "Failed to update post", http.StatusInternalServerError)
+		helper.WriteErrorResponse(w, "Failed to update post", http.StatusInternalServerError)
 		return
 	}
 

@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"fmt"
+	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/infrastructure/model"
 	"time"
 
@@ -19,7 +20,15 @@ type User struct {
 	IconFileName string `gorm:"size:255"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
-	// Posts        []Post `gorm:"foreignKey:UserID"`
+}
+
+func ToEntityUser(user User) *entity.User {
+	return &entity.User{
+		ID:           user.ID,
+		UserName:     user.UserName,
+		AccountID:    user.AccountID,
+		IconFileName: user.IconFileName,
+	}
 }
 
 func NewGormUsersRepository(db *gorm.DB) *GormUsersRepository {
@@ -28,21 +37,21 @@ func NewGormUsersRepository(db *gorm.DB) *GormUsersRepository {
 	}
 }
 
-func (r *GormUsersRepository) Find(id uint) (User, error) {
+func (r *GormUsersRepository) Find(id uint) (*entity.User, error) {
 	var user User
 
 	result := r.DB.Debug().First(&user, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return User{}, fmt.Errorf("user not found with id: %d", id)
+			return nil, fmt.Errorf("user not found with id: %d", id)
 		}
-		return User{}, fmt.Errorf("failed to retrieve user by ID: %w", result.Error)
+		return nil, fmt.Errorf("failed to retrieve user by ID: %w", result.Error)
 	}
 
-	return user, nil
+	return ToEntityUser(user), nil
 }
 
-func (r *GormUsersRepository) Save(user model.User) (User, error) {
+func (r *GormUsersRepository) Save(user model.User) (*entity.User, error) {
 	newUser := User{
 		UserName:     user.UserName,
 		AccountID:    user.AccountID,
@@ -51,9 +60,9 @@ func (r *GormUsersRepository) Save(user model.User) (User, error) {
 
 	result := r.DB.Create(&newUser)
 	if result.Error != nil {
-		return User{}, fmt.Errorf("failed to save user: %w", result.Error)
+		return nil, fmt.Errorf("failed to save user: %w", result.Error)
 	}
 
-	return newUser, nil
+	return ToEntityUser(newUser), nil
 }
 
