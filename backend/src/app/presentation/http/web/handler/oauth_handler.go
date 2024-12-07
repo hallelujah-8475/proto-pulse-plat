@@ -54,7 +54,7 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.SetCookie(w, &http.Cookie{
-		Name:     "jwt",
+		Name:     "auth_token",
 		Value:    tokenString,
 		Path:     "/",
 		Expires:  time.Now().Add(24 * time.Hour),

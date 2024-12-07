@@ -57,7 +57,7 @@ func (u *postUsecase) List(r *http.Request) (response.PostList, error) {
     var profile *model.UserProfile
 
     // JWT Cookie を取得
-    cookie, err := r.Cookie("jwt")
+    cookie, err := r.Cookie("auth_token")
     if err != nil {
         if err == http.ErrNoCookie {
             // JWT がない場合でも動作するように profile を nil に設定
@@ -181,7 +181,7 @@ func (u *postUsecase) Add(r *http.Request) error {
 	var profile *model.UserProfile
 
     // JWT Cookie を取得
-    cookie, err := r.Cookie("jwt")
+    cookie, err := r.Cookie("auth_token")
     if err != nil {
         if err == http.ErrNoCookie {
             // JWT がない場合でも動作するように profile を nil に設定

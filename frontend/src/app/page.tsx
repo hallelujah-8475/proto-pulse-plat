@@ -35,14 +35,13 @@ export default function Home() {
     }
   };
 
-  const checkJWT = () => {
-    // document.cookie から 'jwt=' という名前のcookieを取得
+  const checkCookie = () => {
     const token = document.cookie
       .split("; ")
-      .find((row) => row.startsWith("jwt="))
-      ?.split("=")[1]; // cookieからトークンを抽出
+      .find((row) => row.startsWith("auth_token="))
+      ?.split("=")[1];
 
-    setIsAuthenticated(!!token); // token が null または undefined なら false, それ以外は true
+    setIsAuthenticated(!!token);
   };
 
   const handleEditClick = (postId: number) => {
@@ -113,7 +112,7 @@ export default function Home() {
     try {
       const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
       axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
-        localStorage.removeItem("jwt");
+        localStorage.removeItem("auth_token");
         setIsAuthenticated(false); // ログアウト時に認証状態を false に
         window.location.href = "/";
       });
@@ -124,7 +123,7 @@ export default function Home() {
 
   useLayoutEffect(() => {
     fetchPosts();
-    checkJWT();
+    checkCookie();
   }, [paging.page, paging.per_page]);
 
   return (

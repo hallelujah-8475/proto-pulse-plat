@@ -14,7 +14,7 @@ func NewLogoutHandler(
 }
 func (oc *LogoutHandler) Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
-		Name:     "jwt",               // 削除したいクッキーの名前
+		Name:     "auth_token",               // 削除したいクッキーの名前
 		Value:    "",                  // 値を空にする
 		Path:     "/",                 // クッキーが有効なパス
 		Expires:  time.Unix(0, 0),     // 過去の日付を設定
