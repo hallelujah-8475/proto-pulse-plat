@@ -7,14 +7,14 @@ import (
 )
 
 type PostHandler struct {
-	PostUsecase      usecase.PostUsecase
+	PostUsecase usecase.PostUsecase
 }
 
 func NewPostHandler(
 	postUsecase usecase.PostUsecase,
 ) *PostHandler {
 	return &PostHandler{
-		PostUsecase:      postUsecase,
+		PostUsecase: postUsecase,
 	}
 }
 
@@ -23,7 +23,7 @@ func (oc *PostHandler) GetPostList(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		helper.WriteErrorResponse(w, "Failed GetPostList", http.StatusInternalServerError)
 	}
-	
+
 	err = helper.WriteResponse(w, postList)
 	if err != nil {
 		helper.WriteErrorResponse(w, "Failed WriteResponse", http.StatusInternalServerError)

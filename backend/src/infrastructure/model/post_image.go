@@ -3,9 +3,9 @@ package model
 import "time"
 
 type PostImage struct {
-	ID        uint       `json:"id"`
-	FileName     string    `json:"file_name"`
-	PostID    uint       `json:"post_id"`
+	ID        uint      `json:"id"`
+	FileName  string    `json:"file_name"`
+	PostID    uint      `json:"post_id"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }

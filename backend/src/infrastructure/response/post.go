@@ -7,7 +7,7 @@ type Post struct {
 	Content         string `json:"content"`
 	PostImageBase64 string `json:"post_image_base64"`
 	UserName        string `json:"user_name"`
-	AccountID       string   `json:"account_id"`
+	AccountID       string `json:"account_id"`
 	IconImageBase64 string `json:"icon_image_base64"`
 }
 
@@ -20,8 +20,8 @@ type PostList struct {
 
 // 詳細画面用
 type PostDetail struct {
-	ID              uint   `json:"id"`
-	Title           string `json:"title"`
-	Content         string `json:"content"`
+	ID               uint     `json:"id"`
+	Title            string   `json:"title"`
+	Content          string   `json:"content"`
 	PostImagesBase64 []string `json:"post_images_base64"`
 }

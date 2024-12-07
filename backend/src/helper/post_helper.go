@@ -88,9 +88,9 @@ func BuildPostResponse(post *entity.Post, postImages []entity.PostImage) respons
 	}
 
 	responsePost := response.PostDetail{
-		ID:              post.ID,
-		Title:           post.Title,
-		Content:         post.Content,
+		ID:               post.ID,
+		Title:            post.Title,
+		Content:          post.Content,
 		PostImagesBase64: postImagesBase64,
 	}
 

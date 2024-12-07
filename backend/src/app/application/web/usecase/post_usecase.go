@@ -29,16 +29,20 @@ type PostUsecase interface {
 }
 
 type postUsecase struct {
-	postRepo repository.PostRepository
+	postRepo      repository.PostRepository
 	postImageRepo repository.PostImagesRepository
-	userRepo repository.UsersRepository
+	userRepo      repository.UsersRepository
 }
 
-func NewPostUsecase(postRepo repository.PostRepository, postImageRepo repository.PostImagesRepository, userRepo repository.UsersRepository) PostUsecase {
+func NewPostUsecase(
+	postRepo repository.PostRepository,
+	postImageRepo repository.PostImagesRepository,
+	userRepo repository.UsersRepository,
+) PostUsecase {
 	return &postUsecase{
-		postRepo: postRepo,
+		postRepo:      postRepo,
 		postImageRepo: postImageRepo,
-		userRepo: userRepo,
+		userRepo:      userRepo,
 	}
 }
 
@@ -123,7 +127,7 @@ func (u *postUsecase) Delete(r *http.Request) error {
 	return nil
 }
 
-func (u *postUsecase) Add(r *http.Request) (error) {
+func (u *postUsecase) Add(r *http.Request) error {
 	err := helper.ValidateMethod(r, http.MethodPost)
 	if err != nil {
 		return errors.New(err.Error())
@@ -145,7 +149,7 @@ func (u *postUsecase) Add(r *http.Request) (error) {
 	}
 
 	if content == "" {
-		return  errors.New(err.Error())
+		return errors.New(err.Error())
 	}
 
 	addedPost, err := u.postRepo.Save(mapper.ToModelPost(title, content, uint(uint64ID)))
@@ -239,7 +243,7 @@ func (uc *postUsecase) Update(r *http.Request) error {
 
 	post := model.Post{
 		ID:        postID,
-		Title: title,
+		Title:     title,
 		Content:   content,
 		UserID:    int(postEntity.UserID),
 		CreatedAt: time.Now(),
@@ -295,6 +299,6 @@ func (uc *postUsecase) GetPost(r *http.Request) (response.PostDetail, error) {
 	}
 
 	postDetail := helper.BuildPostResponse(post, postImages)
-	
+
 	return postDetail, nil
 }

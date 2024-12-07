@@ -65,4 +65,3 @@ func (r *GormUsersRepository) Save(user model.User) (*entity.User, error) {
 
 	return ToEntityUser(newUser), nil
 }
-

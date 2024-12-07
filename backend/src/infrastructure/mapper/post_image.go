@@ -7,6 +7,6 @@ import (
 func ToModelPostImage(fileName string, postID uint) model.PostImage {
 	return model.PostImage{
 		FileName: fileName,
-		PostID: postID,
+		PostID:   postID,
 	}
 }

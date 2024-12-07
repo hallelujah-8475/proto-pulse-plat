@@ -67,7 +67,7 @@ func GenerateJWT(profile response.UserProfile, user entity.User) (string, error)
 
 	// クレームを作成
 	claims := jwt.MapClaims{
-		"id":              user.ID,
+		"id":                user.ID,
 		"name":              profile.Name,
 		"screen_name":       profile.ScreenName,
 		"profile_image_url": profile.ProfileImageUrl,

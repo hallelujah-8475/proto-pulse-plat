@@ -25,13 +25,13 @@ type OAuthUsecase interface {
 }
 
 type oauthUsecase struct {
-	xConfig *config.Xconfig
+	xConfig  *config.Xconfig
 	userRepo repository.UsersRepository
 }
 
 func NewOAuthUseCase(xConfig *config.Xconfig, userRepo repository.UsersRepository) OAuthUsecase {
 	return &oauthUsecase{
-		xConfig:      xConfig,
+		xConfig:  xConfig,
 		userRepo: userRepo,
 	}
 }
@@ -64,7 +64,11 @@ func (ou *oauthUsecase) MakeOAuthRequest() (*http.Request, error) {
 		log.Fatal("Error parsing response:", err)
 	}
 
-	return http.NewRequest(http.MethodGet, fmt.Sprintf("%s?oauth_token=%s", ou.xConfig.AuthorizeURL, values.Get("oauth_token")), nil)
+	return http.NewRequest(
+		http.MethodGet,
+		fmt.Sprintf("%s?oauth_token=%s", ou.xConfig.AuthorizeURL, values.Get("oauth_token")),
+		nil,
+	)
 }
 
 func (ou *oauthUsecase) makeOAuthTokenRequestURL() (string, error) {
@@ -128,13 +132,12 @@ func (ou *oauthUsecase) GetOAuthResponse(r *http.Request) (string, error) {
 	if err != nil {
 		return "", errors.New(err.Error())
 	}
-	
+
 	resp, err := oauthClient.Get(ou.xConfig.VerifyCredentials)
 	if err != nil {
 		return "", errors.New(err.Error())
 	}
 	defer resp.Body.Close()
-
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {

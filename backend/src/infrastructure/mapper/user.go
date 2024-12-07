@@ -6,8 +6,8 @@ import (
 
 func ToModelUser(userName, accountID, iconFileName string) model.User {
 	return model.User{
-		UserName: userName,
-		AccountID: accountID,
+		UserName:     userName,
+		AccountID:    accountID,
 		IconFileName: iconFileName,
 	}
 }

@@ -73,7 +73,7 @@ func (ch *CertificationHandler) Certificate(w http.ResponseWriter, r *http.Reque
 	}
 
 	profile := model.UserProfile{
-		ID: id,
+		ID:              id,
 		Name:            name,
 		ScreenName:      screenName,
 		ProfileImageUrl: profileImageUrl,

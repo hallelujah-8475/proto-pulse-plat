@@ -66,7 +66,6 @@ func (r *GormPostsRepository) FindAllWithPagination(limit int, offset int) ([]en
 	return posts, count, nil
 }
 
-
 func (r *GormPostsRepository) Save(post model.Post) (*entity.Post, error) {
 	newPost := Post{
 		Title:   post.Title,
@@ -81,7 +80,6 @@ func (r *GormPostsRepository) Save(post model.Post) (*entity.Post, error) {
 
 	return ToEntityPost(newPost), nil
 }
-
 
 func (r *GormPostsRepository) FindByID(postID int) (*entity.Post, error) {
 	var post Post

@@ -10,8 +10,8 @@ type Post struct {
 	Content   string
 	FileName  string
 	FilePath  string
-	UserID    uint  
-	User      User  
+	UserID    uint
+	User      User
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
