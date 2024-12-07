@@ -35,12 +35,12 @@ func main() {
 	usersRepository := postgres.NewGormUsersRepository(db)
 	postImagesRepository := postgres.NewGormPostImagesRepository(db)
 
-	oauthUsecase := usecase.NewOAuthUseCase(xConfig)
+	oauthUsecase := usecase.NewOAuthUseCase(xConfig, usersRepository)
 	postUsecase := usecase.NewPostUsecase(postsRepository, postImagesRepository, usersRepository)
 	userUsecase := usecase.NewUserUsecase(usersRepository)
 
 	certificationHandler := handler.NewCertificationHandler()
-	oauthClientHandler := handler.NewOAuthClient(*oauthUsecase, userUsecase, xConfig)
+	oauthClientHandler := handler.NewOAuthClient(oauthUsecase, userUsecase, xConfig)
 	postHandler := handler.NewPostHandler(postUsecase, userUsecase)
 
 	r := mux.NewRouter()

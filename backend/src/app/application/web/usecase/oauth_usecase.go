@@ -1,45 +1,45 @@
 package usecase
 
 import (
+	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
 	"proto-pulse-plat/config"
+	"proto-pulse-plat/domain/repository"
 	"proto-pulse-plat/helper"
+	"proto-pulse-plat/infrastructure/mapper"
+	"proto-pulse-plat/infrastructure/response"
 	"time"
 
 	"github.com/dghubble/oauth1"
 )
 
-type OAuthUsecase struct {
-	AuthorizeURL      string
-	VerifyCredentials string
-	RequestTokenURL   string
-	AccessTokenURL    string
-	ConsumerKey       string
-	ConsumerSecret    string
-	CallBackURL       string
+type OAuthUsecase interface {
+	MakeOAuthRequest() (*http.Request, error)
+	MakeOAuthClient(params url.Values) (*http.Client, error)
+	GetOAuthResponse(r *http.Request) (string, error)
 }
 
-func NewOAuthUseCase(xConfig *config.Xconfig) *OAuthUsecase {
-	return &OAuthUsecase{
-		AuthorizeURL:      xConfig.AuthorizeURL,
-		VerifyCredentials: xConfig.VerifyCredentials,
-		RequestTokenURL:   xConfig.RequestTokenURL,
-		AccessTokenURL:    xConfig.AccessTokenURL,
-		ConsumerKey:       xConfig.ConsumerKey,
-		ConsumerSecret:    xConfig.ConsumerSecret,
-		CallBackURL:       xConfig.CallBackURL,
+type oauthUsecase struct {
+	xConfig *config.Xconfig
+	userRepo repository.UsersRepository
+}
+
+func NewOAuthUseCase(xConfig *config.Xconfig, userRepo repository.UsersRepository) OAuthUsecase {
+	return &oauthUsecase{
+		xConfig:      xConfig,
+		userRepo: userRepo,
 	}
 }
 
-func (ou *OAuthUsecase) GetOAuthToken() (string, error) {
+func (ou *oauthUsecase) MakeOAuthRequest() (*http.Request, error) {
 	oauthTokenRequestURL, err := ou.makeOAuthTokenRequestURL()
 	if err != nil {
-		fmt.Println(err)
-		return "", nil
+		log.Fatal("Error oauthTokenRequestURL:", err)
 	}
 
 	req, err := http.NewRequest(http.MethodPost, oauthTokenRequestURL, nil)
@@ -64,14 +64,10 @@ func (ou *OAuthUsecase) GetOAuthToken() (string, error) {
 		log.Fatal("Error parsing response:", err)
 	}
 
-	return values.Get("oauth_token"), nil
+	return http.NewRequest(http.MethodGet, fmt.Sprintf("%s?oauth_token=%s", ou.xConfig.AuthorizeURL, values.Get("oauth_token")), nil)
 }
 
-func (ou *OAuthUsecase) MakeOAuthRequest(oauthToken string) (*http.Request, error) {
-	return http.NewRequest(http.MethodGet, fmt.Sprintf("%s?oauth_token=%s", ou.AuthorizeURL, oauthToken), nil)
-}
-
-func (ou *OAuthUsecase) makeOAuthTokenRequestURL() (string, error) {
+func (ou *oauthUsecase) makeOAuthTokenRequestURL() (string, error) {
 	nonce, err := helper.GenerateNonce(16)
 	if err != nil {
 		fmt.Println("Error generating nonce:", err)
@@ -79,25 +75,25 @@ func (ou *OAuthUsecase) makeOAuthTokenRequestURL() (string, error) {
 	}
 
 	params := url.Values{}
-	params.Set("oauth_consumer_key", ou.ConsumerKey)
+	params.Set("oauth_consumer_key", ou.xConfig.ConsumerKey)
 	params.Set("oauth_signature_method", "HMAC-SHA1")
 	params.Set("oauth_timestamp", fmt.Sprintf("%d", time.Now().Unix()))
 	params.Set("oauth_nonce", nonce)
 	params.Set("oauth_version", "1.0")
-	params.Set("oauth_callback", ou.CallBackURL)
-	signatureBaseString := helper.CreateSignatureBaseString(http.MethodPost, ou.RequestTokenURL, params)
-	oauthSignature, err := helper.GenerateHMACSHA1Signature(signatureBaseString, ou.ConsumerSecret+"&")
+	params.Set("oauth_callback", ou.xConfig.CallBackURL)
+	signatureBaseString := helper.CreateSignatureBaseString(http.MethodPost, ou.xConfig.RequestTokenURL, params)
+	oauthSignature, err := helper.GenerateHMACSHA1Signature(signatureBaseString, ou.xConfig.ConsumerSecret+"&")
 	if err != nil {
 		fmt.Println("Error generating signature:", err)
 		return "", nil
 	}
 	params.Set("oauth_signature", oauthSignature)
 
-	return ou.RequestTokenURL + "?" + params.Encode(), nil
+	return ou.xConfig.RequestTokenURL + "?" + params.Encode(), nil
 }
 
-func (ou *OAuthUsecase) MakeOAuthClient(params url.Values) (*http.Client, error) {
-	resp, err := http.PostForm(ou.AccessTokenURL, params)
+func (ou *oauthUsecase) MakeOAuthClient(params url.Values) (*http.Client, error) {
+	resp, err := http.PostForm(ou.xConfig.AccessTokenURL, params)
 	if err != nil {
 		fmt.Println("Error getting access token:", err)
 		return nil, err
@@ -116,13 +112,49 @@ func (ou *OAuthUsecase) MakeOAuthClient(params url.Values) (*http.Client, error)
 		return nil, err
 	}
 
-	config := oauth1.NewConfig(ou.ConsumerKey, ou.ConsumerSecret)
+	config := oauth1.NewConfig(ou.xConfig.ConsumerKey, ou.xConfig.ConsumerSecret)
 	token := oauth1.NewToken(oauthTokenValues.Get("oauth_token"), oauthTokenValues.Get("oauth_token_secret"))
 	oauthClient := config.Client(oauth1.NoContext, token)
 
 	return oauthClient, nil
 }
 
-func (ou *OAuthUsecase) GetOAuthResponse(oauthClient *http.Client) (*http.Response, error) {
-	return oauthClient.Get(ou.VerifyCredentials)
+func (ou *oauthUsecase) GetOAuthResponse(r *http.Request) (string, error) {
+	params := url.Values{}
+	params.Add("oauth_token", r.URL.Query().Get("oauth_token"))
+	params.Add("oauth_verifier", r.URL.Query().Get("oauth_verifier"))
+
+	oauthClient, err := ou.MakeOAuthClient(params)
+	if err != nil {
+		return "", errors.New(err.Error())
+	}
+	
+	resp, err := oauthClient.Get(ou.xConfig.VerifyCredentials)
+	if err != nil {
+		return "", errors.New(err.Error())
+	}
+	defer resp.Body.Close()
+
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", errors.New(err.Error())
+	}
+
+	var profile response.UserProfile
+	if err := json.Unmarshal(body, &profile); err != nil {
+		return "", errors.New(err.Error())
+	}
+
+	user, err := ou.userRepo.Save(mapper.ToModelUser(profile.ScreenName, profile.Name, ""))
+	if err != nil {
+		return "", errors.New("failed to save user")
+	}
+
+	tokenString, err := helper.GenerateJWT(profile, *user)
+	if err != nil {
+		return "", errors.New(err.Error())
+	}
+
+	return tokenString, nil
 }

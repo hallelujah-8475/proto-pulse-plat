@@ -3,15 +3,12 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"proto-pulse-plat/app/application/web/usecase"
 	"proto-pulse-plat/config"
 	"proto-pulse-plat/helper"
-	"proto-pulse-plat/infrastructure/response"
 	"time"
 )
 
@@ -28,13 +25,7 @@ func NewOAuthClient(oauthUsecase usecase.OAuthUsecase, userUsecase usecase.UserU
 }
 
 func (oc *OAuthClient) OauthCertificate(w http.ResponseWriter, r *http.Request) {
-	oauthToken, err := oc.OauthUsecase.GetOAuthToken()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-
-	req, err := oc.OauthUsecase.MakeOAuthRequest(oauthToken)
+	req, err := oc.OauthUsecase.MakeOAuthRequest()
 	if err != nil {
 		fmt.Println("Error creating request:", err)
 		return
@@ -58,50 +49,9 @@ func (oc *OAuthClient) OauthCertificate(w http.ResponseWriter, r *http.Request) 
 }
 
 func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
-	params := url.Values{}
-	params.Add("oauth_token", r.URL.Query().Get("oauth_token"))
-	params.Add("oauth_verifier", r.URL.Query().Get("oauth_verifier"))
-
-	oauthClient, err := oc.OauthUsecase.MakeOAuthClient(params)
+	tokenString, err := oc.OauthUsecase.GetOAuthResponse(r)
 	if err != nil {
-		fmt.Println("Error MakeOAuthClient:", err)
-		http.Error(w, "OAuth client creation failed", http.StatusInternalServerError)
-		return
-	}
-
-	resp, err := oc.OauthUsecase.GetOAuthResponse(oauthClient)
-	if err != nil {
-		fmt.Println("Error verifying credentials:", err)
-		http.Error(w, "OAuth response retrieval failed", http.StatusInternalServerError)
-		return
-	}
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Println("Error reading response:", err)
-		http.Error(w, "Failed to read response body", http.StatusInternalServerError)
-		return
-	}
-
-	var profile response.UserProfile
-	if err := json.Unmarshal(body, &profile); err != nil {
-		fmt.Println("Error parsing JSON:", err)
-		http.Error(w, "Failed to parse JSON response", http.StatusInternalServerError)
-		return
-	}
-
-	user, err := oc.UserUsecase.Add(profile.ScreenName, profile.Name, "")
-	if err != nil {
-		log.Println("user Add error")
-		return
-	}
-
-	tokenString, err := helper.GenerateJWT(profile, *user)
-	if err != nil {
-		fmt.Println("Error generating JWT:", err)
-		http.Error(w, "Failed to generate JWT", http.StatusInternalServerError)
-		return
+		helper.WriteErrorResponse(w, "Failed GetOAuthResponse", http.StatusInternalServerError)
 	}
 
 	http.SetCookie(w, &http.Cookie{
