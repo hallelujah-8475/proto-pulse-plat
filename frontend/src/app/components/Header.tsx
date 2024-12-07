@@ -1,64 +1,18 @@
-"use client";
+// components/Header.tsx
 
 import React from "react";
-import axios from "axios";
 
-export const Header: React.FC = () => {
-  // JWTトークンの取得
-  const token = localStorage.getItem("jwt"); // またはcookiesから取得する場合
-  const isAuthenticated = token !== null; // トークンがある場合、認証済み
+interface HeaderProps {
+  isAuthenticated: boolean;
+  oauth: (event: React.MouseEvent<HTMLButtonElement>) => void;
+  logout: () => void;
+}
 
-  const fetchOAuthURL = async (): Promise<string | null> => {
-    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
-    if (!oauthURL) {
-      console.error("OAuth URL is not defined");
-      return null;
-    }
-
-    try {
-      const response = await axios.get(oauthURL, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200 && response.data.redirectURL) {
-        return response.data.redirectURL;
-      } else {
-        console.error("Redirect URL is not available");
-        return null;
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error during OAuth request:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-      return null;
-    }
-  };
-
-  const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const redirectURL = await fetchOAuthURL();
-    if (redirectURL != null) {
-      window.location.href = redirectURL;
-    }
-  };
-
-  const logout = () => {
-    try {
-      const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
-      axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
-        // JWTを削除してログアウト状態にする
-        localStorage.removeItem("jwt");
-        window.location.href = "/";
-      });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
+export const Header: React.FC<HeaderProps> = ({
+  isAuthenticated,
+  oauth,
+  logout,
+}) => {
   return (
     <header className="text-gray-600 body-font">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center gap-2">
