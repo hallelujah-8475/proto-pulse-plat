@@ -178,17 +178,52 @@ func (u *postUsecase) Add(r *http.Request) error {
 		return errors.New(err.Error())
 	}
 
+	var profile *model.UserProfile
+
+    // JWT Cookie を取得
+    cookie, err := r.Cookie("jwt")
+    if err != nil {
+        if err == http.ErrNoCookie {
+            // JWT がない場合でも動作するように profile を nil に設定
+            profile = nil
+        } else {
+            return errors.New(err.Error())
+        }
+    } else {
+        // JWT を解析
+        tokenStr := cookie.Value
+        claims := &jwt.MapClaims{}
+        secretKeyStr := os.Getenv("JWT_SECRET_KEY")
+        secretKey := []byte(secretKeyStr)
+
+        token, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+            if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
+                return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+            }
+            return secretKey, nil
+        })
+        if err == nil && token != nil && token.Valid {
+            // 必要なクレームを取得
+            id, _ := (*claims)["id"].(float64)
+            name, _ := (*claims)["name"].(string)
+            screenName, _ := (*claims)["screen_name"].(string)
+            profileImageUrl, _ := (*claims)["profile_image_url"].(string)
+
+            profile = &model.UserProfile{
+                ID:              id,
+                Name:            name,
+                ScreenName:      screenName,
+                ProfileImageUrl: profileImageUrl,
+            }
+        }
+    }
+
 	err = helper.ParseMultipart(r)
 	if err != nil {
 		return errors.New(err.Error())
 	}
 
-	id, title, content, files, err := validation.ValidateFormInputs(r)
-	if err != nil {
-		return errors.New(err.Error())
-	}
-
-	uint64ID, err := strconv.ParseUint(id, 10, 32)
+	title, content, files, err := validation.ValidateFormInputs(r)
 	if err != nil {
 		return errors.New(err.Error())
 	}
@@ -197,7 +232,7 @@ func (u *postUsecase) Add(r *http.Request) error {
 		return errors.New(err.Error())
 	}
 
-	addedPost, err := u.postRepo.Save(mapper.ToModelPost(title, content, uint(uint64ID)))
+	addedPost, err := u.postRepo.Save(mapper.ToModelPost(title, content, uint(profile.ID)))
 	if err != nil {
 		return errors.New(err.Error())
 	}

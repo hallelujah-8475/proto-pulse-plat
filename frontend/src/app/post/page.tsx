@@ -5,13 +5,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Header } from "../components/Header";
 import { Footer } from "../components/Footer";
-
-interface UserProfile {
-  id: string;
-  name: string;
-  screen_name: string;
-  profile_image_url_https: string;
-}
+import axios from "axios";
 
 type FormData = {
   title: string;
@@ -24,7 +18,6 @@ const PostPage: React.FC = () => {
   const [isConfirming, setIsConfirming] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   const {
     register,
@@ -52,7 +45,6 @@ const PostPage: React.FC = () => {
   const handleFinalSubmit = async () => {
     const values = getValues();
     const data = new FormData();
-    data.append("id", profile != null ? profile.id : "");
     data.append("title", values.title);
     data.append("content", values.content);
 
@@ -62,11 +54,13 @@ const PostPage: React.FC = () => {
 
     const add_post_URL = process.env.NEXT_PUBLIC_API_URL + "/post/add";
     try {
-      const response = await fetch(add_post_URL!, {
-        method: "POST",
-        body: data,
+      const response = await axios.post(add_post_URL, data, {
+        withCredentials: true,
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
-      if (response.ok) {
+      if (response.status === 200) {
         router.push("/post/complete");
       } else {
         console.error("Failed to add post");
