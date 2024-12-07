@@ -40,7 +40,8 @@ func (oc *OAuthClient) OauthCertificate(w http.ResponseWriter, r *http.Request) 
 	response := map[string]string{"redirectURL": resp.Request.URL.String()}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	if err := json.NewEncoder(w).Encode(response); err != nil {
+	err = json.NewEncoder(w).Encode(response)
+	if err != nil {
 		http.Error(w, "Failed to send JSON response", http.StatusInternalServerError)
 		log.Println("Error encoding JSON response:", err)
 	}
