@@ -18,6 +18,7 @@ export default function Home() {
   });
   const [showModal, setShowModal] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const fetchPosts = async () => {
     try {
@@ -32,6 +33,16 @@ export default function Home() {
     } catch (error) {
       console.error("Error fetching posts:", error);
     }
+  };
+
+  const checkJWT = () => {
+    // document.cookie から 'jwt=' という名前のcookieを取得
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("jwt="))
+      ?.split("=")[1]; // cookieからトークンを抽出
+
+    setIsAuthenticated(!!token); // token が null または undefined なら false, それ以外は true
   };
 
   const handleEditClick = (postId: number) => {
@@ -59,10 +70,6 @@ export default function Home() {
       console.error("Error deleting post:", error);
     }
   };
-
-  // JWTトークンの取得と認証状態の確認
-  const token = localStorage.getItem("jwt");
-  const isAuthenticated = token !== null;
 
   const fetchOAuthURL = async (): Promise<string | null> => {
     const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
@@ -107,6 +114,7 @@ export default function Home() {
       const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
       axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
         localStorage.removeItem("jwt");
+        setIsAuthenticated(false); // ログアウト時に認証状態を false に
         window.location.href = "/";
       });
     } catch (error) {
@@ -116,6 +124,7 @@ export default function Home() {
 
   useLayoutEffect(() => {
     fetchPosts();
+    checkJWT();
   }, [paging.page, paging.per_page]);
 
   return (

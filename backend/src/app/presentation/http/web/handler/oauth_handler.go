@@ -58,7 +58,7 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		Value:    tokenString,
 		Path:     "/",
 		Expires:  time.Now().Add(24 * time.Hour),
-		HttpOnly: true,
+		HttpOnly: false,
 		Secure:   false, // 本番環境では true にする
 	})
 
