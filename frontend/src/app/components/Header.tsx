@@ -1,8 +1,13 @@
 "use client";
 
+import React from "react";
 import axios from "axios";
 
 export const Header: React.FC = () => {
+  // JWTトークンの取得
+  const token = localStorage.getItem("jwt"); // またはcookiesから取得する場合
+  const isAuthenticated = token !== null; // トークンがある場合、認証済み
+
   const fetchOAuthURL = async (): Promise<string | null> => {
     const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
     if (!oauthURL) {
@@ -35,7 +40,6 @@ export const Header: React.FC = () => {
 
   const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
-
     const redirectURL = await fetchOAuthURL();
     if (redirectURL != null) {
       window.location.href = redirectURL;
@@ -45,12 +49,14 @@ export const Header: React.FC = () => {
   const logout = () => {
     try {
       const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
-      const response = axios.post(logoutAPI, {}, { withCredentials: true });
-      console.log(response);
+      axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
+        // JWTを削除してログアウト状態にする
+        localStorage.removeItem("jwt");
+        window.location.href = "/";
+      });
     } catch (error) {
       console.error("Logout failed:", error);
     }
-    window.location.href = "/";
   };
 
   return (
@@ -83,30 +89,35 @@ export const Header: React.FC = () => {
             投稿する
           </button>
         </a>
-        <button
-          type="button"
-          onClick={oauth}
-          className="mb-2 flex rounded bg-[#1da1f2] px-6 py-2.5 text-xs font-medium text-white shadow-md transition duration-150 ease-in-out"
-        >
-          <span className="me-2">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="currentColor"
-              viewBox="0 0 512 512"
-              className="h-4 w-4"
-            >
-              <path d="M459.4 151.7c.3 4.5 .3 9.1 .3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53 51.7 63.7 129.3 105.3 216.4 109.8-1.6-7.8-2.6-15.9-2.6-24 0-57.8 46.8-104.9 104.9-104.9 30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3z" />
-            </svg>
-          </span>
-          Twitterでログイン
-        </button>
-        <button
-          type="button"
-          onClick={logout}
-          className="mb-2 flex text-xs bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2.5 px-4 border border-gray-400 rounded shadow"
-        >
-          ログアウト
-        </button>
+
+        {/* ログイン状態によってボタンを切り替え */}
+        {isAuthenticated ? (
+          <button
+            type="button"
+            onClick={logout}
+            className="mb-2 flex text-xs bg-white hover:bg-gray-100 text-gray-800 font-semibold py-2.5 px-4 border border-gray-400 rounded shadow"
+          >
+            ログアウト
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={oauth}
+            className="mb-2 flex rounded bg-[#1da1f2] px-6 py-2.5 text-xs font-medium text-white shadow-md transition duration-150 ease-in-out"
+          >
+            <span className="me-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="currentColor"
+                viewBox="0 0 512 512"
+                className="h-4 w-4"
+              >
+                <path d="M459.4 151.7c.3 4.5 .3 9.1 .3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53 51.7 63.7 129.3 105.3 216.4 109.8-1.6-7.8-2.6-15.9-2.6-24 0-57.8 46.8-104.9 104.9-104.9 30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3z" />
+              </svg>
+            </span>
+            Twitterでログイン
+          </button>
+        )}
       </div>
     </header>
   );
