@@ -21,6 +21,7 @@ type Post = {
   user_name: string;
   account_id: string;
   icon_image_base64: string;
+  is_own_post: boolean;
 };
 
 type PostList = {
@@ -82,7 +83,9 @@ export default function Home() {
   const fetchPosts = async () => {
     try {
       const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/post/list?page=${paging.page}&limit=${paging.per_page}`;
-      const response = await axios.get<PostList>(fetchURL);
+      const response = await axios.get<PostList>(fetchURL, {
+        withCredentials: true,
+      });
       const data = response.data;
       setPosts(data.posts);
       setPaging({
@@ -145,27 +148,6 @@ export default function Home() {
     }
   };
 
-  // ローカルストレージからプロファイルを取得する関数
-  const loadProfileFromLocalStorage = () => {
-    try {
-      const profile = localStorage.getItem("profile");
-      if (profile) {
-        const parsedProfile = JSON.parse(profile) as { data: UserProfile };
-
-        // データ部分を取り出してセット
-        if (parsedProfile.data) {
-          setProfile(parsedProfile.data as UserProfile);
-        } else {
-          console.log("Profile data is missing in parsed object");
-        }
-      } else {
-        console.log("No profile found in localStorage");
-      }
-    } catch (error) {
-      console.log("Error loading profile from localStorage:", error);
-    }
-  };
-
   const deletePost = async () => {
     if (postToDelete === null) return;
 
@@ -194,7 +176,6 @@ export default function Home() {
   };
 
   useLayoutEffect(() => {
-    loadProfileFromLocalStorage();
     fetchPosts();
   }, [paging.page, paging.per_page]);
 
@@ -314,7 +295,7 @@ export default function Home() {
                             </button>
                           </a>
                         </div>
-                        {profile && profile.screen_name === post.account_id && (
+                        {post.is_own_post && (
                           <div className="inline-flex items-center rounded-md shadow-sm mt-4">
                             <a onClick={() => handleEditClick(post.id)}>
                               <button className="text-slate-800 hover:text-blue-600 text-sm bg-white hover:bg-slate-100 border border-slate-200 rounded-l-lg font-medium px-4 py-2 inline-flex space-x-1 items-center">
@@ -382,7 +363,7 @@ export default function Home() {
                     />
                     <div className="py-2">
                       <h3 className="font-bold text-2xl text-gray-800 dark:text-white mb-1">
-                        {post.user_name}
+                        {post.account_id}
                       </h3>
                       <div className="inline-flex text-gray-700 dark:text-gray-300 items-center">
                         <span className="me-2 [&>svg]:h-4 [&>svg]:w-4">
@@ -395,7 +376,8 @@ export default function Home() {
                             <path d="M459.4 151.7c.3 4.5 .3 9.1 .3 13.6 0 138.7-105.6 298.6-298.6 298.6-59.5 0-114.7-17.2-161.1-47.1 8.4 1 16.6 1.3 25.3 1.3 49.1 0 94.2-16.6 130.3-44.8-46.1-1-84.8-31.2-98.1-72.8 6.5 1 13 1.6 19.8 1.6 9.4 0 18.8-1.3 27.6-3.6-48.1-9.7-84.1-52-84.1-103v-1.3c14 7.8 30.2 12.7 47.4 13.3-28.3-18.8-46.8-51-46.8-87.4 0-19.5 5.2-37.4 14.3-53 51.7 63.7 129.3 105.3 216.4 109.8-1.6-7.8-2.6-15.9-2.6-24 0-57.8 46.8-104.9 104.9-104.9 30.2 0 57.5 12.7 76.7 33.1 23.7-4.5 46.5-13.3 66.6-25.3-7.8 24.4-24.4 44.8-46.1 57.8 21.1-2.3 41.6-8.1 60.4-16.2-14.3 20.8-32.2 39.3-52.6 54.3z" />
                           </svg>
                         </span>
-                        @{post.account_id}
+                        @{post.user_name}
+                        {post.is_own_post}
                       </div>
                     </div>
                   </div>

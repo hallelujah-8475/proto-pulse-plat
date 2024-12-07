@@ -33,35 +33,16 @@ export const Header: React.FC = () => {
     }
   };
 
-  const fetchCertification = async (): Promise<void> => {
-    const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/certification`;
-
-    try {
-      const response = await axios.get(fetchURL, {
-        withCredentials: true,
-      });
-      localStorage.setItem("profile", JSON.stringify(response));
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error fetching certification:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-    }
-  };
-
   const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
 
     const redirectURL = await fetchOAuthURL();
-    if (!redirectURL) return;
-
-    await fetchCertification();
-    window.location.href = redirectURL;
+    if (redirectURL != null) {
+      window.location.href = redirectURL;
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem("profile");
     try {
       const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
       const response = axios.post(logoutAPI, {}, { withCredentials: true });

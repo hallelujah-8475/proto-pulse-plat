@@ -9,6 +9,7 @@ type Post struct {
 	UserName        string `json:"user_name"`
 	AccountID       string `json:"account_id"`
 	IconImageBase64 string `json:"icon_image_base64"`
+	IsOwnPost bool `json:"is_own_post"`
 }
 
 type PostList struct {

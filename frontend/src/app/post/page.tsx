@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Header } from "../components/Header";
@@ -79,31 +79,6 @@ const PostPage: React.FC = () => {
   const goBack = () => {
     setIsConfirming(false);
   };
-
-  // ローカルストレージからプロファイルを取得する関数
-  const loadProfileFromLocalStorage = () => {
-    try {
-      const profile = localStorage.getItem("profile");
-      if (profile) {
-        const parsedProfile = JSON.parse(profile) as { data: UserProfile };
-
-        // データ部分を取り出してセット
-        if (parsedProfile.data) {
-          setProfile(parsedProfile.data as UserProfile);
-        } else {
-          console.log("Profile data is missing in parsed object");
-        }
-      } else {
-        console.log("No profile found in localStorage");
-      }
-    } catch (error) {
-      console.log("Error loading profile from localStorage:", error);
-    }
-  };
-
-  useLayoutEffect(() => {
-    loadProfileFromLocalStorage();
-  }, []);
 
   return (
     <>

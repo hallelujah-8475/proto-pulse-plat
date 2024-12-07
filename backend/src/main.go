@@ -38,14 +38,12 @@ func main() {
 	oauthUsecase := usecase.NewOAuthUseCase(xConfig, usersRepository)
 	postUsecase := usecase.NewPostUsecase(postsRepository, postImagesRepository, usersRepository)
 
-	certificationHandler := handler.NewCertificationHandler()
 	oauthClientHandler := handler.NewOAuthClient(oauthUsecase, xConfig)
 	postHandler := handler.NewPostHandler(postUsecase)
 	logoutHandler := handler.NewLogoutHandler()
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
-	apiRouter.HandleFunc("/certification", certificationHandler.Certificate)
 	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthCertificate)
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.OauthCallback)
 	apiRouter.HandleFunc("/logout", logoutHandler.Logout)

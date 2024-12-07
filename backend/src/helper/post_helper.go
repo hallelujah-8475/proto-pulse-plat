@@ -13,6 +13,7 @@ import (
 	"os"
 	"path/filepath"
 	"proto-pulse-plat/domain/entity"
+	"proto-pulse-plat/infrastructure/model"
 	"proto-pulse-plat/infrastructure/response"
 	"strings"
 
@@ -35,6 +36,7 @@ func BuildPostListResponse(
 	postImagesMap map[uint][]entity.PostImage,
 	totalCount int64,
 	page, perPage int,
+	loginUser *model.UserProfile,
 ) response.PostList {
 	// ユーザーIDをキーにしたユーザーマップを作成
 	userMap := make(map[uint]entity.User)
@@ -65,7 +67,8 @@ func BuildPostListResponse(
 			PostImageBase64: postImageBase64,
 			UserName:        user.UserName,
 			AccountID:       user.AccountID,
-			IconImageBase64: GetPostBase64Image(user.IconFileName), // UserにIconImageBase64があると仮定
+			IconImageBase64: GetPostBase64Image(user.IconFileName),
+			IsOwnPost:       loginUser != nil && user.UserName == loginUser.ScreenName,
 		}
 		responsePosts = append(responsePosts, responsePost)
 	}
@@ -113,7 +116,6 @@ func GetPostBase64Image(fileName string) string {
 		Key:    aws.String(fileName),
 	})
 	if err != nil {
-		fmt.Println("failed to get object from S3", err)
 		return ""
 	}
 	defer output.Body.Close()
