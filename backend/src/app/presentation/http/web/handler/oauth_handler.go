@@ -14,13 +14,11 @@ import (
 
 type OAuthClient struct {
 	OauthUsecase usecase.OAuthUsecase
-	UserUsecase usecase.UserUsecase
 }
 
-func NewOAuthClient(oauthUsecase usecase.OAuthUsecase, userUsecase usecase.UserUsecase, xConfig *config.Xconfig) *OAuthClient {
+func NewOAuthClient(oauthUsecase usecase.OAuthUsecase, xConfig *config.Xconfig) *OAuthClient {
 	return &OAuthClient{
 		OauthUsecase: oauthUsecase,
-		UserUsecase: userUsecase,
 	}
 }
 

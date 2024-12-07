@@ -37,11 +37,10 @@ func main() {
 
 	oauthUsecase := usecase.NewOAuthUseCase(xConfig, usersRepository)
 	postUsecase := usecase.NewPostUsecase(postsRepository, postImagesRepository, usersRepository)
-	userUsecase := usecase.NewUserUsecase(usersRepository)
 
 	certificationHandler := handler.NewCertificationHandler()
-	oauthClientHandler := handler.NewOAuthClient(oauthUsecase, userUsecase, xConfig)
-	postHandler := handler.NewPostHandler(postUsecase, userUsecase)
+	oauthClientHandler := handler.NewOAuthClient(oauthUsecase, xConfig)
+	postHandler := handler.NewPostHandler(postUsecase)
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()

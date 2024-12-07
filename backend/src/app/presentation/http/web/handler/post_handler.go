@@ -8,16 +8,13 @@ import (
 
 type PostHandler struct {
 	PostUsecase      usecase.PostUsecase
-	UserUsecase      usecase.UserUsecase
 }
 
 func NewPostHandler(
 	postUsecase usecase.PostUsecase,
-	userUsecase usecase.UserUsecase,
 ) *PostHandler {
 	return &PostHandler{
 		PostUsecase:      postUsecase,
-		UserUsecase:      userUsecase,
 	}
 }
 
