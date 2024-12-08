@@ -142,12 +142,12 @@ const PostDetailPage: React.FC = () => {
                   </span>
                 </button>
               </div>
-              <button
+              {/* <button
                 onClick={() => router.push("/post/edit?post_id=" + postId)}
                 className="mt-5 bg-indigo-600 hover:bg-indigo-400 text-white py-2 px-4 rounded"
               >
                 編集
-              </button>
+              </button> */}
             </div>
           )}
         </div>

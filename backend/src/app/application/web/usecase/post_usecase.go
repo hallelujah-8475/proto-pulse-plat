@@ -17,7 +17,6 @@ import (
 	"proto-pulse-plat/infrastructure/model"
 	"proto-pulse-plat/infrastructure/response"
 	"strconv"
-	"time"
 
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -26,7 +25,7 @@ type PostUsecase interface {
 	List(r *http.Request) (response.PostList, error)
 	Delete(r *http.Request) error
 	Add(r *http.Request) error
-	Update(r *http.Request) error
+	// Update(r *http.Request) error
 	FileUploads(files []*multipart.FileHeader) error
 	GetPost(r *http.Request) (response.PostDetail, error)
 }
@@ -269,73 +268,73 @@ func (u *postUsecase) Add(r *http.Request) error {
 	return nil
 }
 
-func (uc *postUsecase) Update(r *http.Request) error {
-	err := helper.ValidateMethod(r, http.MethodPut)
-	if err != nil {
-		return errors.New(err.Error())
-	}
+// func (uc *postUsecase) Update(r *http.Request) error {
+// 	err := helper.ValidateMethod(r, http.MethodPut)
+// 	if err != nil {
+// 		return errors.New(err.Error())
+// 	}
 
-	postIDStr := r.URL.Query().Get("post_id")
-	if postIDStr == "" {
-		return errors.New(err.Error())
-	}
+// 	postIDStr := r.URL.Query().Get("post_id")
+// 	if postIDStr == "" {
+// 		return errors.New(err.Error())
+// 	}
 
-	postID, err := strconv.Atoi(postIDStr)
-	if err != nil {
-		return errors.New(err.Error())
-	}
+// 	postID, err := strconv.Atoi(postIDStr)
+// 	if err != nil {
+// 		return errors.New(err.Error())
+// 	}
 
-	err = r.ParseMultipartForm(10 << 20)
-	if err != nil {
-		return errors.New(err.Error())
-	}
+// 	err = r.ParseMultipartForm(10 << 20)
+// 	if err != nil {
+// 		return errors.New(err.Error())
+// 	}
 
-	title := r.FormValue("title")
-	if title == "" {
-		return errors.New(err.Error())
-	}
+// 	title := r.FormValue("title")
+// 	if title == "" {
+// 		return errors.New(err.Error())
+// 	}
 
-	content := r.FormValue("content")
-	if content == "" {
-		return errors.New(err.Error())
-	}
+// 	content := r.FormValue("content")
+// 	if content == "" {
+// 		return errors.New(err.Error())
+// 	}
 
-	var file multipart.File
-	var fileHeader *multipart.FileHeader
-	file, fileHeader, err = r.FormFile("file")
-	if err != nil && err != http.ErrMissingFile {
-		return errors.New(err.Error())
-	}
+// 	var file multipart.File
+// 	var fileHeader *multipart.FileHeader
+// 	file, fileHeader, err = r.FormFile("file")
+// 	if err != nil && err != http.ErrMissingFile {
+// 		return errors.New(err.Error())
+// 	}
 
-	if fileHeader != nil {
-		defer file.Close()
+// 	if fileHeader != nil {
+// 		defer file.Close()
 
-		if fileHeader == nil {
-			return errors.New(err.Error())
-		}
-		fmt.Println("File uploaded:", fileHeader.Filename)
-	}
+// 		if fileHeader == nil {
+// 			return errors.New(err.Error())
+// 		}
+// 		fmt.Println("File uploaded:", fileHeader.Filename)
+// 	}
 
-	postEntity, err := uc.postRepo.FindByID(postID)
-	if err != nil {
-		return fmt.Errorf("could not find post with id %d: %w", postID, err)
-	}
+// 	postEntity, err := uc.postRepo.FindByID(postID)
+// 	if err != nil {
+// 		return fmt.Errorf("could not find post with id %d: %w", postID, err)
+// 	}
 
-	post := model.Post{
-		ID:        postID,
-		Title:     title,
-		Content:   content,
-		UserID:    int(postEntity.UserID),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
+// 	post := model.Post{
+// 		ID:        postID,
+// 		Title:     title,
+// 		Content:   content,
+// 		UserID:    int(postEntity.UserID),
+// 		CreatedAt: time.Now(),
+// 		UpdatedAt: time.Now(),
+// 	}
 
-	if err := uc.postRepo.Update(post); err != nil {
-		return fmt.Errorf("failed to update post: %w", err)
-	}
+// 	if err := uc.postRepo.Update(post); err != nil {
+// 		return fmt.Errorf("failed to update post: %w", err)
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func (uc *postUsecase) FileUploads(files []*multipart.FileHeader) error {
 	if files == nil {

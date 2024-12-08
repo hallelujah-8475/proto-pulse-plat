@@ -44,9 +44,9 @@ export default function Home() {
     setIsAuthenticated(!!token);
   };
 
-  const handleEditClick = (postId: number) => {
-    window.location.href = `/post/edit?post_id=${postId}`;
-  };
+  // const handleEditClick = (postId: number) => {
+  //   window.location.href = `/post/edit?post_id=${postId}`;
+  // };
 
   const confirmDeletePost = (postId: number) => {
     setPostToDelete(postId);
@@ -139,7 +139,7 @@ export default function Home() {
           <PostCard
             key={post.id}
             post={post}
-            onEditClick={handleEditClick}
+            // onEditClick={handleEditClick}
             onDeleteClick={confirmDeletePost}
           />
         ))}

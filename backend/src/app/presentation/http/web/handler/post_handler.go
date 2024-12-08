@@ -62,12 +62,12 @@ func (oc *PostHandler) GetPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (oc *PostHandler) UpdatePost(w http.ResponseWriter, r *http.Request) {
-	err := oc.PostUsecase.Update(r)
-	if err != nil {
-		helper.WriteErrorResponse(w, "Failed to update post", http.StatusInternalServerError)
-		return
-	}
+// func (oc *PostHandler) UpdatePost(w http.ResponseWriter, r *http.Request) {
+// 	err := oc.PostUsecase.Update(r)
+// 	if err != nil {
+// 		helper.WriteErrorResponse(w, "Failed to update post", http.StatusInternalServerError)
+// 		return
+// 	}
 
-	w.WriteHeader(http.StatusOK)
-}
+// 	w.WriteHeader(http.StatusOK)
+// }

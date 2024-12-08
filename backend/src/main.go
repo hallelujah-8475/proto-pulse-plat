@@ -52,7 +52,7 @@ func main() {
 	postRouter.HandleFunc("/delete", postHandler.DeletePost)
 	postRouter.HandleFunc("/list", postHandler.GetPostList)
 	postRouter.HandleFunc("/get", postHandler.GetPost)
-	postRouter.HandleFunc("/edit", postHandler.UpdatePost)
+	// postRouter.HandleFunc("/edit", postHandler.UpdatePost)
 
 	corsMiddleware := middleware.CORSMiddleware()
 	srv := &http.Server{
