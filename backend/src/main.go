@@ -19,7 +19,7 @@ import (
 )
 
 func main() {
-	err := godotenv.Load()
+	err := godotenv.Load("/etc/secrets/.env")
 	if err != nil {
 		log.Println("Error loading .env file")
 	}
