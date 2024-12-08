@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -59,8 +58,7 @@ func main() {
 		Addr:    ":" + os.Getenv("API_PORT"),
 		Handler: corsMiddleware(r),
 	}
-	err = srv.ListenAndServeTLS("server.crt", "server.key")
-	if err != nil {
-		fmt.Println("Error starting server:", err)
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatal(err)
 	}
 }
