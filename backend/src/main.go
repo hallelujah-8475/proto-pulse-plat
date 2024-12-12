@@ -18,9 +18,16 @@ import (
 )
 
 func main() {
-	err := godotenv.Load("/etc/secrets/.env")
-	if err != nil {
-		log.Println("Error loading .env file")
+	env := os.Getenv("APP_ENV")
+	if env == "" {
+		env = "local"
+	}
+
+	var err error
+	if env == "local" {
+		err = godotenv.Load(".env")
+	} else if env == "production" {
+		err = godotenv.Load("/etc/secrets/.env")
 	}
 
 	db, err := gorm.Open(postgres_driver.Open(config.GetDSN()), &gorm.Config{})
@@ -37,12 +44,14 @@ func main() {
 	oauthUsecase := usecase.NewOAuthUseCase(xConfig, usersRepository)
 	postUsecase := usecase.NewPostUsecase(postsRepository, postImagesRepository, usersRepository)
 
+	healthCheckHandler := handler.NewHealthCheckHandler()
 	oauthClientHandler := handler.NewOAuthClient(oauthUsecase, xConfig)
 	postHandler := handler.NewPostHandler(postUsecase)
 	logoutHandler := handler.NewLogoutHandler()
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
+	apiRouter.HandleFunc("/health", healthCheckHandler.HealthCheck)
 	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthCertificate)
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.OauthCallback)
 	apiRouter.HandleFunc("/logout", logoutHandler.Logout)
