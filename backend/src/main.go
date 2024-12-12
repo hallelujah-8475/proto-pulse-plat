@@ -55,7 +55,7 @@ func main() {
 
 	corsMiddleware := middleware.CORSMiddleware()
 	srv := &http.Server{
-		Addr:    ":" + os.Getenv("API_PORT"),
+		Addr:    ":" + os.Getenv("PORT"),
 		Handler: corsMiddleware(r),
 	}
 	if err := srv.ListenAndServe(); err != nil {
