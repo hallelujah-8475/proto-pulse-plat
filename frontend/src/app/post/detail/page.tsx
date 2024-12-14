@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import React, { useState, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import axios from "axios";
 import { Header } from "../../components/Header";
 import { Footer } from "../../components/Footer";
+import Image from "next/image";
 
 interface PostDetail {
   id: number;
@@ -13,10 +15,6 @@ interface PostDetail {
 }
 
 const PostDetailPage: React.FC = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const postId = searchParams.get("post_id");
-
   const [postDetail, setPostDetail] = useState<PostDetail>({
     id: 0,
     title: "",
@@ -26,35 +24,44 @@ const PostDetailPage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
-    const fetchPostDetail = async () => {
-      try {
-        const post_URL = `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`;
-        const response = await fetch(post_URL);
-        if (response.ok) {
-          const postDetail = await response.json();
-          setPostDetail({
-            id: postDetail.id,
-            title: postDetail.title,
-            content: postDetail.content,
-            post_images_base64: postDetail.post_images_base64,
-          });
-        } else {
-          setError("投稿の詳細を取得できませんでした");
-        }
-      } catch (error) {
-        console.error("Error fetching post details:", error);
-        setError("エラーが発生しました");
-      } finally {
-        setIsLoading(false);
+  // Suspense内でuseSearchParamsを使うためのコンポーネント
+  const SearchParamsComponent = () => {
+    const searchParams = useSearchParams();
+    const postId = searchParams.get("post_id");
+
+    useEffect(() => {
+      if (postId) {
+        const fetchPostDetail = async () => {
+          try {
+            const post_URL = `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`;
+            const response = await fetch(post_URL);
+            if (response.ok) {
+              const postDetail = await response.json();
+              setPostDetail({
+                id: postDetail.id,
+                title: postDetail.title,
+                content: postDetail.content,
+                post_images_base64: postDetail.post_images_base64,
+              });
+            } else {
+              setError("投稿の詳細を取得できませんでした");
+            }
+          } catch (error) {
+            console.error("Error fetching post details:", error);
+            setError("エラーが発生しました");
+          } finally {
+            setIsLoading(false);
+          }
+        };
+
+        fetchPostDetail();
       }
-    };
+    }, [postId]);
 
-    if (postId) {
-      fetchPostDetail();
-    }
-  }, [postId]);
+    return null; // データの読み込み中は何も表示しない
+  };
 
   const handlePrevSlide = () => {
     setCurrentSlide((prevSlide) =>
@@ -68,11 +75,65 @@ const PostDetailPage: React.FC = () => {
     );
   };
 
+  const fetchOAuthURL = async (): Promise<string | null> => {
+    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
+    if (!oauthURL) {
+      console.error("OAuth URL is not defined");
+      return null;
+    }
+
+    try {
+      const response = await axios.get(oauthURL, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200 && response.data.redirectURL) {
+        return response.data.redirectURL;
+      } else {
+        console.error("Redirect URL is not available");
+        return null;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error during OAuth request:", error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+      return null;
+    }
+  };
+
+  const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const redirectURL = await fetchOAuthURL();
+    if (redirectURL != null) {
+      window.location.href = redirectURL;
+    }
+  };
+
+  const logout = () => {
+    try {
+      const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
+      axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
+        localStorage.removeItem("auth_token");
+        setIsAuthenticated(false); // ログアウト時に認証状態を false に
+        window.location.href = "/";
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <>
-      <Header />
+      <Header isAuthenticated={isAuthenticated} oauth={oauth} logout={logout} />
       <div className="h-screen dark:bg-gray-800">
         <div className="max-w-xl mt-20 mx-auto p-5">
+          <Suspense fallback={<p>Loading...</p>}>
+            <SearchParamsComponent />
+          </Suspense>
           {isLoading ? (
             <p>読み込み中...</p>
           ) : error ? (
@@ -85,10 +146,13 @@ const PostDetailPage: React.FC = () => {
               <div className="relative w-full">
                 {/* Carousel wrapper */}
                 <div className="relative h-56 overflow-hidden rounded-lg md:h-96">
-                  <img
+                  <Image
                     src={postDetail.post_images_base64[currentSlide]}
                     className="w-full h-full object-cover"
                     alt="carousel image"
+                    layout="responsive"
+                    width={0}
+                    height={0}
                   />
                 </div>
 
@@ -142,12 +206,6 @@ const PostDetailPage: React.FC = () => {
                   </span>
                 </button>
               </div>
-              {/* <button
-                onClick={() => router.push("/post/edit?post_id=" + postId)}
-                className="mt-5 bg-indigo-600 hover:bg-indigo-400 text-white py-2 px-4 rounded"
-              >
-                編集
-              </button> */}
             </div>
           )}
         </div>

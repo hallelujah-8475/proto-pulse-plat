@@ -1,7 +1,7 @@
 // pages/index.tsx
 
 "use client";
-import React, { useLayoutEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import { Header } from "./components/Header";
 import { Footer } from "./components/Footer";
@@ -20,7 +20,7 @@ export default function Home() {
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const fetchPosts = async () => {
+  const fetchPosts = useCallback(async () => {
     try {
       const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/post/list?page=${paging.page}&limit=${paging.per_page}`;
       const response = await axios.get(fetchURL, { withCredentials: true });
@@ -33,7 +33,7 @@ export default function Home() {
     } catch (error) {
       console.error("Error fetching posts:", error);
     }
-  };
+  }, [paging.page, paging.per_page]);
 
   const checkCookie = () => {
     const token = document.cookie
@@ -121,10 +121,10 @@ export default function Home() {
     }
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     fetchPosts();
     checkCookie();
-  }, [paging.page, paging.per_page]);
+  }, [fetchPosts]);
 
   return (
     <>
