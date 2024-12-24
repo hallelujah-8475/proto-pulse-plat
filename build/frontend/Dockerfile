@@ -1,25 +1,17 @@
-# Node.jsのベースイメージ
-FROM node:22.1.0
-
-# 作業ディレクトリの設定
+# Base image
+FROM node:22.1.0 as base
 WORKDIR /frontend
-
-# package.jsonとpackage-lock.jsonをコピー
 COPY ./frontend/package*.json ./
-
-# 依存関係のインストール
 RUN npm install
-
-# アプリケーションコードをコピー
 COPY ./frontend .
 
-# ビルドは本番環境のみ実行
-ARG NODE_ENV
-ENV NODE_ENV=${NODE_ENV}
-RUN if [ "$NODE_ENV" = "production" ]; then npm run build; fi
+# Development stage
+FROM base as dev
+ENV NODE_ENV=development
+CMD ["npm", "run", "dev"]
 
-# アプリケーションで使用するポートを公開
-EXPOSE 3000
-
-# 環境変数に応じて実行コマンドを切り替え
-CMD ["sh", "-c", "if [ \"$NODE_ENV\" = \"production\" ]; then npm run start; else npm run dev; fi"]
+# Production stage
+FROM base as prod
+ENV NODE_ENV=production
+RUN npm run build
+CMD ["npm", "run", "start"]
