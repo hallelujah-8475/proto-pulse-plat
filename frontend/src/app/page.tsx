@@ -21,7 +21,6 @@ export default function Home() {
   const fetchPosts = useCallback(async () => {
     try {
       const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/post/list?page=${paging.page}&limit=${paging.per_page}`;
-      alert(fetchURL);
       const response = await axios.get(fetchURL, { withCredentials: true });
 
       // APIのレスポンスを確認してpostsが配列であることを保証

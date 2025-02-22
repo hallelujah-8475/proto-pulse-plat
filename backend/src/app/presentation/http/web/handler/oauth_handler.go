@@ -62,5 +62,5 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		Secure:   false, // 本番環境では true にする
 	})
 
-	http.Redirect(w, r, fmt.Sprintf("%s:%s", os.Getenv("BASE_HTTPS_URL"), os.Getenv("WEB_PORT")), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("%s", os.Getenv("BASE_HTTPS_URL")), http.StatusSeeOther)
 }
