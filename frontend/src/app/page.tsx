@@ -123,7 +123,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchPosts();
-    checkCookie();
+    // checkCookie();
   }, [fetchPosts]);
 
   return (
