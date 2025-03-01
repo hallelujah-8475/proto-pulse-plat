@@ -37,12 +37,6 @@ services:
       - "8432:80"
     depends_on:
       - db
-  localstack:
-    image: localstack/localstack
-    ports:
-      - "4566:4566"
-    environment:
-      - SERVICES=s3,dynamodb,sqs
 
 volumes:
   postgres_data:

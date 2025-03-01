@@ -9,9 +9,6 @@ import (
 )
 
 func CORSMiddleware() func(http.Handler) http.Handler {
-	fmt.Println("Allowed Origins:", 
-    fmt.Sprintf("%s:%s", os.Getenv("BASE_HTTP_URL"), os.Getenv("WEB_PORT")),
-)
 	return handlers.CORS(
 		handlers.AllowedOrigins(
 			[]string{

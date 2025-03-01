@@ -33,7 +33,7 @@ func NewGormPostImagesRepository(db *gorm.DB) *GormPostImagesRepository {
 func (r *GormPostImagesRepository) FindByPostID(postID uint) ([]entity.PostImage, error) {
 	var postImages []entity.PostImage
 
-	result := r.DB.Debug().Where("post_id = ?", postID).Find(&postImages)
+	result := r.DB.Where("post_id = ?", postID).Find(&postImages)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 			return nil, fmt.Errorf("no images found for post with id: %d", postID)

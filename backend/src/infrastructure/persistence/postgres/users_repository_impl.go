@@ -18,6 +18,7 @@ type User struct {
 	UserName     string `gorm:"size:50"`
 	AccountID    string `gorm:"size:50;unique"`
 	IconFileName string `gorm:"size:255"`
+	IconData     []byte
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -28,6 +29,7 @@ func ToEntityUser(user User) *entity.User {
 		UserName:     user.UserName,
 		AccountID:    user.AccountID,
 		IconFileName: user.IconFileName,
+		IconData:     user.IconData,
 	}
 }
 
@@ -56,6 +58,7 @@ func (r *GormUsersRepository) Save(user model.User) (*entity.User, error) {
 		UserName:     user.UserName,
 		AccountID:    user.AccountID,
 		IconFileName: user.IconFileName,
+		IconData:     user.IconData,
 	}
 
 	result := r.DB.Create(&newUser)

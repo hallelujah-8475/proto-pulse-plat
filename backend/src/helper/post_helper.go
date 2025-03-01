@@ -56,7 +56,11 @@ func BuildPostListResponse(
 		// ベース64エンコードされた画像を結合（例として最初の画像のみ）
 		var postImageBase64 string
 		if len(postImages) > 0 {
-			postImageBase64 = GetPostBase64Image(postImages[0].FileName) // PostImageにBase64フィールドがあると仮定
+			postImageBase64 = fmt.Sprintf(
+				"data:%s;base64,%s",
+				getImageBase64(postImages[0].FileName),
+				base64.StdEncoding.EncodeToString(postImages[0].Data),
+			) // PostImageにBase64フィールドがあると仮定
 		}
 
 		// レスポンス用Post構造体に変換
@@ -67,8 +71,11 @@ func BuildPostListResponse(
 			PostImageBase64: postImageBase64,
 			UserName:        user.UserName,
 			AccountID:       user.AccountID,
-			IconImageBase64: GetPostBase64Image(user.IconFileName),
-			IsOwnPost:       loginUser != nil && user.UserName == loginUser.ScreenName,
+			IconImageBase64: fmt.Sprintf(
+				"data:%s;base64,%s",
+				getImageBase64(user.IconFileName),
+				base64.StdEncoding.EncodeToString(user.IconData)),
+			IsOwnPost: loginUser != nil && user.UserName == loginUser.ScreenName,
 		}
 		responsePosts = append(responsePosts, responsePost)
 	}

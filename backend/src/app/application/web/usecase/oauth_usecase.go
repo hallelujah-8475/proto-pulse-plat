@@ -149,7 +149,20 @@ func (ou *oauthUsecase) GetOAuthResponse(r *http.Request) (string, error) {
 		return "", errors.New(err.Error())
 	}
 
-	user, err := ou.userRepo.Save(mapper.ToModelUser(profile.ScreenName, profile.Name, ""))
+	// 画像をダウンロード
+	resp, err = http.Get(profile.ProfileImageUrl)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+	// 画像データを読み込む
+	imageData, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	user, err := ou.userRepo.Save(mapper.ToModelUser(profile.ScreenName, profile.Name, "test.jpg", imageData))
 	if err != nil {
 		return "", errors.New("failed to save user")
 	}

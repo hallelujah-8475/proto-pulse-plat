@@ -39,14 +39,14 @@ export default function Home() {
     }
   }, [paging.page, paging.per_page]);
 
-  const checkCookie = () => {
-    const token = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("auth_token="))
-      ?.split("=")[1];
+  // const checkCookie = () => {
+  //   const token = document.cookie
+  //     .split("; ")
+  //     .find((row) => row.startsWith("auth_token="))
+  //     ?.split("=")[1];
 
-    setIsAuthenticated(!!token);
-  };
+  //   setIsAuthenticated(!!token);
+  // };
 
   const confirmDeletePost = (postId: number) => {
     setPostToDelete(postId);
