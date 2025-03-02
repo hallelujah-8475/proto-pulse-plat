@@ -93,8 +93,12 @@ func BuildPostResponse(post *entity.Post, postImages []entity.PostImage) respons
 	var postImagesBase64 []string
 
 	for _, postImage := range postImages {
-		base64Image := GetPostBase64Image(postImage.FileName)
-		postImagesBase64 = append(postImagesBase64, base64Image)
+		postImageBase64 := fmt.Sprintf(
+			"data:%s;base64,%s",
+			getImageBase64(postImage.FileName),
+			base64.StdEncoding.EncodeToString(postImage.Data),
+		);
+		postImagesBase64 = append(postImagesBase64, postImageBase64)
 	}
 
 	responsePost := response.PostDetail{

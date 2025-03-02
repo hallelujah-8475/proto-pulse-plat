@@ -32,6 +32,8 @@ const PostDetailPage: React.FC = () => {
     const postId = searchParams.get("post_id");
 
     useEffect(() => {
+      if (!postId) return;
+
       if (postId) {
         const fetchPostDetail = async () => {
           try {
