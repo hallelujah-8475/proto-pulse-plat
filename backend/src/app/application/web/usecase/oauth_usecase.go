@@ -13,6 +13,7 @@ import (
 	"proto-pulse-plat/helper"
 	"proto-pulse-plat/infrastructure/mapper"
 	"proto-pulse-plat/infrastructure/response"
+	"strings"
 	"time"
 
 	"github.com/dghubble/oauth1"
@@ -150,7 +151,7 @@ func (ou *oauthUsecase) GetOAuthResponse(r *http.Request) (string, error) {
 	}
 
 	// 画像をダウンロード
-	resp, err = http.Get(profile.ProfileImageUrl)
+	resp, err = http.Get(strings.Replace(profile.ProfileImageUrl, "_normal", "", 1))
 	if err != nil {
 		log.Fatal(err)
 	}

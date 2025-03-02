@@ -3,6 +3,7 @@ services:
   frontend:
     build:
       dockerfile: ./build/frontend/Dockerfile
+      target: dev
     volumes:
       - ./frontend:/frontend
     ports:

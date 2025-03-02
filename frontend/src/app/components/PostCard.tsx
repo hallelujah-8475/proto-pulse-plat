@@ -55,6 +55,14 @@ const PostCard: React.FC<PostCardProps> = ({
                   </button>
                 </div>
               )}
+              <Image
+                src={post.icon_image_base64 || "/noimage.jpg"}
+                className="shadow rounded-lg overflow-hidden border mt-2"
+                layout="responsive"
+                width={0}
+                height={0}
+                alt="icon"
+              />
             </div>
           </div>
         </div>
