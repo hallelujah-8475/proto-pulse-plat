@@ -3,10 +3,10 @@
 import React, { useState, useEffect, Suspense } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import { Header } from "../../components/Header";
-import { Footer } from "../../components/Footer";
+import { Header } from "../../../components/Header";
+import { Footer } from "../../../components/Footer";
 import Image from "next/image";
-import { PostDetail } from "../../types/post";
+import { PostDetail } from "../../../types/post";
 
 const PostDetailPage: React.FC = () => {
   const [postDetail, setPostDetail] = useState<PostDetail>({

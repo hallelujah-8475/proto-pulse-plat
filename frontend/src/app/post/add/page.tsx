@@ -63,7 +63,7 @@ const PostPage: React.FC = () => {
         },
       });
       if (response.status === 200) {
-        router.push("/posts/complete");
+        router.push("/post/complete");
       } else {
         console.error("Failed to add post");
       }

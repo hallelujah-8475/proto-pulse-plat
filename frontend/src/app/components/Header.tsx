@@ -35,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
           <span className="ml-3 text-xl">Tailblocks</span>
         </a>
         <nav className="md:ml-auto flex flex-wrap items-center text-base justify-center"></nav>
-        <a href="/post">
+        <a href="/post/add">
           <button
             type="button"
             className="mb-2 flex rounded bg-red-600 hover:bg-red-700 focus:ring-red-500 focus:ring-offset-red-200 text-white px-6 py-2.5 text-xs font-medium uppercase leading-normal shadow-md transition duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-offset-2"
