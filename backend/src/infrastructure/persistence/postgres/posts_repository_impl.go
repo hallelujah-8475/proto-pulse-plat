@@ -84,7 +84,7 @@ func (r *GormPostsRepository) Save(post model.Post) (*entity.Post, error) {
 func (r *GormPostsRepository) FindByID(postID int) (*entity.Post, error) {
 	var post Post
 
-	result := r.DB.Debug().First(&post, postID)
+	result := r.DB.First(&post, postID)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("post not found with id: %d", postID)

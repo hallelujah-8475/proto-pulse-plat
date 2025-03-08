@@ -42,7 +42,7 @@ func NewGormUsersRepository(db *gorm.DB) *GormUsersRepository {
 func (r *GormUsersRepository) Find(id uint) (*entity.User, error) {
 	var user User
 
-	result := r.DB.Debug().First(&user, id)
+	result := r.DB.First(&user, id)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, fmt.Errorf("user not found with id: %d", id)

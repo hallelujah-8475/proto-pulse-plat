@@ -20,7 +20,7 @@ const PostCard: React.FC<PostCardProps> = ({
           <div className="p-8 max-w-lg border border-gray-300 rounded-2xl hover:shadow-xl hover:shadow-gray-50 flex flex-col items-center">
             <Image
               src={post.post_image_base64 || "/noimage.jpg"}
-              className="shadow rounded-lg overflow-hidden border"
+              className="shadow rounded-lg overflow-hidden border max-h-60 object-contain"
               layout="responsive"
               width={0}
               height={0}
@@ -63,6 +63,8 @@ const PostCard: React.FC<PostCardProps> = ({
                 height={0}
                 alt="icon"
               />
+              <p className="mt-2 text-gray-600">{post.account_id}</p>
+              <p className="mt-2 text-gray-600">@{post.user_name}</p>
             </div>
           </div>
         </div>

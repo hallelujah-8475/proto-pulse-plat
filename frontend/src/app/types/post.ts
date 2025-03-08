@@ -1,5 +1,3 @@
-// types/post.ts
-
 export type UserProfile = {
   id: number;
   name: string;
@@ -16,6 +14,13 @@ export type Post = {
   account_id: string;
   icon_image_base64: string;
   is_own_post: boolean;
+};
+
+export type PostDetail = {
+  id: number;
+  title: string;
+  content: string;
+  post_images_base64: string[];
 };
 
 export type Paging = {

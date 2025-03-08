@@ -3,8 +3,8 @@
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { Header } from "../components/Header";
-import { Footer } from "../components/Footer";
+import { Header } from "../../components/Header";
+import { Footer } from "../../components/Footer";
 import axios from "axios";
 import Image from "next/image";
 
@@ -63,7 +63,7 @@ const PostPage: React.FC = () => {
         },
       });
       if (response.status === 200) {
-        router.push("/post/complete");
+        router.push("/posts/complete");
       } else {
         console.error("Failed to add post");
       }
