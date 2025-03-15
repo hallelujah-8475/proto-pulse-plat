@@ -1,9 +1,11 @@
 "use client";
+
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
 import Modal from "./components/Modal";
 import PostCard from "./components/PostCard";
 import { Post, Paging } from "./types/post";
+import Image from "next/image";
 
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>([]); // 初期値は空の配列
@@ -69,6 +71,15 @@ export default function Home() {
         onClose={() => setShowModal(false)}
         onConfirm={deletePost}
       />
+      <div className="w-full">
+        <Image
+          src={"/top_image.png"}
+          alt="icon"
+          width={0}
+          height={0}
+          layout="responsive"
+        />
+      </div>
       <div className="py-20 px-6 md:px-12 lg:grid lg:grid-cols-4 lg:gap-8">
         {posts && posts.length > 0 ? (
           posts.map((post) => (

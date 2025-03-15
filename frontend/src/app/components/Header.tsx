@@ -102,7 +102,6 @@ export const Header: React.FC = () => {
           </button>
         </a>
 
-        {/* ログイン状態によってボタンを切り替え */}
         {isAuthenticated ? (
           <button
             type="button"
