@@ -1,10 +1,7 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-import axios from "axios";
-import { Header } from "../../../components/Header";
-import { Footer } from "../../../components/Footer";
 import Image from "next/image";
 import { PostDetail } from "../../../types/post";
 
@@ -17,7 +14,6 @@ const PostDetailPage: React.FC = () => {
   });
   const [error, setError] = useState("");
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const params = useParams();
   const postId = params.id;
@@ -38,12 +34,9 @@ const PostDetailPage: React.FC = () => {
               content: postDetail.content,
               post_images_base64: postDetail.post_images_base64,
             });
-          } else {
-            setError("投稿の詳細を取得できませんでした");
           }
         } catch (error) {
           console.error("Error fetching post details:", error);
-          setError("エラーが発生しました");
         }
       };
 
@@ -63,60 +56,8 @@ const PostDetailPage: React.FC = () => {
     );
   };
 
-  const fetchOAuthURL = async (): Promise<string | null> => {
-    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
-    if (!oauthURL) {
-      console.error("OAuth URL is not defined");
-      return null;
-    }
-
-    try {
-      const response = await axios.get(oauthURL, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200 && response.data.redirectURL) {
-        return response.data.redirectURL;
-      } else {
-        console.error("Redirect URL is not available");
-        return null;
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error during OAuth request:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-      return null;
-    }
-  };
-
-  const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const redirectURL = await fetchOAuthURL();
-    if (redirectURL != null) {
-      window.location.href = redirectURL;
-    }
-  };
-
-  const logout = () => {
-    try {
-      const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
-      axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
-        localStorage.removeItem("auth_token");
-        setIsAuthenticated(false);
-        window.location.href = "/";
-      });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   return (
     <>
-      <Header isAuthenticated={isAuthenticated} oauth={oauth} logout={logout} />
       <div className="min-screen dark:bg-gray-800">
         <div className="max-w-xl mt-20 mx-auto p-5">
           <div>
@@ -152,7 +93,6 @@ const PostDetailPage: React.FC = () => {
           </div>
         </div>
       </div>
-      <Footer />
     </>
   );
 };

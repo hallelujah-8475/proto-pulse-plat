@@ -28,3 +28,9 @@ export type Paging = {
   page: number;
   per_page: number;
 };
+
+export type PostFormData = {
+  title: string;
+  content: string;
+  file: FileList;
+};

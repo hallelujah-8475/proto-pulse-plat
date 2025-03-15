@@ -1,18 +1,76 @@
-// components/Header.tsx
+"use client";
 
 import React from "react";
+import axios from "axios";
+import { useState, useEffect } from "react";
 
-interface HeaderProps {
-  isAuthenticated: boolean;
-  oauth: (event: React.MouseEvent<HTMLButtonElement>) => void;
-  logout: () => void;
-}
+export const Header: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-export const Header: React.FC<HeaderProps> = ({
-  isAuthenticated,
-  oauth,
-  logout,
-}) => {
+  const fetchOAuthURL = async (): Promise<string | null> => {
+    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
+    if (!oauthURL) {
+      console.error("OAuth URL is not defined");
+      return null;
+    }
+
+    try {
+      const response = await axios.get(oauthURL, {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.status === 200 && response.data.redirectURL) {
+        return response.data.redirectURL;
+      } else {
+        console.error("Redirect URL is not available");
+        return null;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        console.error("Error during OAuth request:", error.message);
+      } else {
+        console.error("Unexpected error:", error);
+      }
+      return null;
+    }
+  };
+
+  const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    const redirectURL = await fetchOAuthURL();
+    if (redirectURL != null) {
+      window.location.href = redirectURL;
+    }
+  };
+
+  const logout = () => {
+    try {
+      const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
+      axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
+        localStorage.removeItem("auth_token");
+        setIsAuthenticated(false);
+        window.location.href = "/";
+      });
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
+  const checkCookie = () => {
+    const token = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("auth_token="))
+      ?.split("=")[1];
+
+    setIsAuthenticated(!!token);
+  };
+
+  useEffect(() => {
+    checkCookie();
+  }, []);
+
   return (
     <header className="text-gray-600 body-font">
       <div className="container mx-auto flex flex-wrap p-5 flex-col md:flex-row items-center gap-2">

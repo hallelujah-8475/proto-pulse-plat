@@ -1,8 +1,6 @@
 "use client";
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import { Header } from "./components/Header";
-import { Footer } from "./components/Footer";
 import Modal from "./components/Modal";
 import PostCard from "./components/PostCard";
 import { Post, Paging } from "./types/post";
@@ -16,7 +14,6 @@ export default function Home() {
   });
   const [showModal, setShowModal] = useState(false);
   const [postToDelete, setPostToDelete] = useState<number | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -38,15 +35,6 @@ export default function Home() {
       console.error("Error fetching posts:", error);
     }
   }, [paging.page, paging.per_page]);
-
-  // const checkCookie = () => {
-  //   const token = document.cookie
-  //     .split("; ")
-  //     .find((row) => row.startsWith("auth_token="))
-  //     ?.split("=")[1];
-
-  //   setIsAuthenticated(!!token);
-  // };
 
   const confirmDeletePost = (postId: number) => {
     setPostToDelete(postId);
@@ -70,65 +58,12 @@ export default function Home() {
     }
   };
 
-  const fetchOAuthURL = async (): Promise<string | null> => {
-    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
-    if (!oauthURL) {
-      console.error("OAuth URL is not defined");
-      return null;
-    }
-
-    try {
-      const response = await axios.get(oauthURL, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200 && response.data.redirectURL) {
-        return response.data.redirectURL;
-      } else {
-        console.error("Redirect URL is not available");
-        return null;
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error during OAuth request:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-      return null;
-    }
-  };
-
-  const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const redirectURL = await fetchOAuthURL();
-    if (redirectURL != null) {
-      window.location.href = redirectURL;
-    }
-  };
-
-  const logout = () => {
-    try {
-      const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
-      axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
-        localStorage.removeItem("auth_token");
-        setIsAuthenticated(false); // ログアウト時に認証状態を false に
-        window.location.href = "/";
-      });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   useEffect(() => {
     fetchPosts();
-    // checkCookie();
   }, [fetchPosts]);
 
   return (
     <>
-      <Header isAuthenticated={isAuthenticated} oauth={oauth} logout={logout} />
       <Modal
         showModal={showModal}
         onClose={() => setShowModal(false)}
@@ -144,10 +79,9 @@ export default function Home() {
             />
           ))
         ) : (
-          <p>No posts available</p> // ポストがない場合のメッセージ
+          <p>No posts available</p>
         )}
       </div>
-      <Footer />
     </>
   );
 }

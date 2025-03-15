@@ -3,30 +3,22 @@
 import React, { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { useRouter } from "next/navigation";
-import { Header } from "../../components/Header";
-import { Footer } from "../../components/Footer";
 import axios from "axios";
 import Image from "next/image";
-
-type FormData = {
-  title: string;
-  content: string;
-  file: FileList;
-};
+import { PostFormData } from "../../types/post";
 
 const PostPage: React.FC = () => {
   const router = useRouter();
   const [isConfirming, setIsConfirming] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [previewUrls, setPreviewUrls] = useState<string[]>([]);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const {
     register,
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<PostFormData>();
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
@@ -36,7 +28,7 @@ const PostPage: React.FC = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<FormData> = (data) => {
+  const onSubmit: SubmitHandler<PostFormData> = (data) => {
     if (errors.title || errors.content || !data.file?.length) {
       setErrorMessage("ファイルを選択してください");
       return;
@@ -76,60 +68,8 @@ const PostPage: React.FC = () => {
     setIsConfirming(false);
   };
 
-  const fetchOAuthURL = async (): Promise<string | null> => {
-    const oauthURL = process.env.NEXT_PUBLIC_API_URL + "/oauth";
-    if (!oauthURL) {
-      console.error("OAuth URL is not defined");
-      return null;
-    }
-
-    try {
-      const response = await axios.get(oauthURL, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      if (response.status === 200 && response.data.redirectURL) {
-        return response.data.redirectURL;
-      } else {
-        console.error("Redirect URL is not available");
-        return null;
-      }
-    } catch (error) {
-      if (axios.isAxiosError(error)) {
-        console.error("Error during OAuth request:", error.message);
-      } else {
-        console.error("Unexpected error:", error);
-      }
-      return null;
-    }
-  };
-
-  const oauth = async (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    const redirectURL = await fetchOAuthURL();
-    if (redirectURL != null) {
-      window.location.href = redirectURL;
-    }
-  };
-
-  const logout = () => {
-    try {
-      const logoutAPI = `${process.env.NEXT_PUBLIC_API_URL}/logout`;
-      axios.post(logoutAPI, {}, { withCredentials: true }).then(() => {
-        localStorage.removeItem("auth_token");
-        setIsAuthenticated(false); // ログアウト時に認証状態を false に
-        window.location.href = "/";
-      });
-    } catch (error) {
-      console.error("Logout failed:", error);
-    }
-  };
-
   return (
     <>
-      <Header isAuthenticated={isAuthenticated} oauth={oauth} logout={logout} />
       <div className="h-screen dark:bg-gray-800">
         <div className="max-w-xl mt-20 mx-auto">
           {isConfirming ? (
@@ -253,7 +193,6 @@ const PostPage: React.FC = () => {
           )}
         </div>
       </div>
-      <Footer />
     </>
   );
 };

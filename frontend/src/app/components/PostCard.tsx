@@ -1,18 +1,14 @@
 import React from "react";
 import Image from "next/image";
 import { Post } from "../types/post";
+import Link from "next/link";
 
 interface PostCardProps {
   post: Post;
-  //   onEditClick: (postId: number) => void;
   onDeleteClick: (postId: number) => void;
 }
 
-const PostCard: React.FC<PostCardProps> = ({
-  post,
-  //   onEditClick,
-  onDeleteClick,
-}) => {
+const PostCard: React.FC<PostCardProps> = ({ post, onDeleteClick }) => {
   return (
     <div className="max-w-sm mx-auto bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg">
       <div className="px-4 pb-6">
@@ -30,14 +26,19 @@ const PostCard: React.FC<PostCardProps> = ({
               <h4 className="font-bold text-xl">{post.title}</h4>
               <p className="mt-2 text-gray-600">{post.content}</p>
               <div className="mt-5">
-                <a href={`/post/detail/${post.id}`}>
+                <Link
+                  href={{
+                    pathname: `/post/detail/${post.id}`,
+                  }}
+                  passHref
+                >
                   <button
                     type="button"
                     className="inline-flex items-center rounded-md border border-transparent bg-gray-800 px-3 py-2 text-sm font-medium leading-4 text-white shadow-sm hover:bg-gray-900"
                   >
                     詳細
                   </button>
-                </a>
+                </Link>
               </div>
               {post.is_own_post && (
                 <div className="inline-flex items-center rounded-md shadow-sm mt-4">
