@@ -73,7 +73,7 @@ export default function Home() {
       />
       <div className="w-full">
         <Image
-          src={"/top_image.png"}
+          src={"/top.jpg"}
           alt="icon"
           width={0}
           height={0}
