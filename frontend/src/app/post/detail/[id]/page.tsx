@@ -80,13 +80,13 @@ const PostDetailPage: React.FC = () => {
                   className="flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 dark:text-white bg-white dark:bg-gray-800 transition-colors hover:border-blue-600 hover:bg-blue-400 hover:text-white dark:hover:text-white"
                   onClick={handlePrevSlide}
                 >
-                  Previous
+                  前の画像
                 </button>
                 <button
                   className="flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 dark:text-white bg-white dark:bg-gray-800 transition-colors hover:border-blue-600 hover:bg-blue-400 hover:text-white dark:hover:text-white"
                   onClick={handleNextSlide}
                 >
-                  Next
+                  次の画像
                 </button>
               </nav>
             </div>

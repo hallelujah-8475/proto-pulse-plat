@@ -76,11 +76,11 @@ const PostPage: React.FC = () => {
             <div className="p-5">
               <h2 className="text-lg font-bold mb-4">確認ページ</h2>
               <p className="mb-2">タイトル:</p>
-              <p className="border p-3 mb-4">
+              <p className="border p-3 mb-4 border-none">
                 {getValues("title") || "タイトルがありません"}
               </p>
               <p className="mb-2">投稿内容:</p>
-              <p className="border p-3 mb-4">
+              <p className="border p-3 mb-4 border-none">
                 {getValues("content") || "内容がありません"}
               </p>
               <p className="mb-2">選択した画像:</p>
