@@ -7,13 +7,6 @@ export const Footer: React.FC = () => {
   return (
     <footer className="mx-auto w-full max-w-container px-4 sm:px-6 lg:px-8">
       <div className="border-t border-slate-900/5 py-10">
-        <Image
-          src="/logo.png"
-          alt="Logo"
-          width={170}
-          height={50}
-          className="mx-auto w-auto text-slate-900 rounded-lg"
-        />
         <p className="mt-5 text-center text-sm leading-6 text-slate-500">
           © 2025 Costole! All rights reserved.
         </p>

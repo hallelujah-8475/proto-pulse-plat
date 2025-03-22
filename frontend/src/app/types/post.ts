@@ -1,10 +1,3 @@
-export type UserProfile = {
-  id: number;
-  name: string;
-  screen_name: string;
-  profile_image_url_https: string;
-};
-
 export type Post = {
   id: number;
   title: string;
@@ -14,6 +7,7 @@ export type Post = {
   account_id: string;
   icon_image_base64: string;
   is_own_post: boolean;
+  user_id: number;
 };
 
 export type PostDetail = {

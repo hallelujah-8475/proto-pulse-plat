@@ -43,11 +43,13 @@ func main() {
 
 	oauthUsecase := usecase.NewOAuthUseCase(xConfig, usersRepository)
 	postUsecase := usecase.NewPostUsecase(postsRepository, postImagesRepository, usersRepository)
+	userUsecase := usecase.NewUserUsecase(usersRepository)
 
 	healthCheckHandler := handler.NewHealthCheckHandler()
 	oauthClientHandler := handler.NewOAuthClient(oauthUsecase, xConfig)
 	postHandler := handler.NewPostHandler(postUsecase)
 	logoutHandler := handler.NewLogoutHandler()
+	userHandler := handler.NewUserHandler(userUsecase)
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
@@ -60,6 +62,8 @@ func main() {
 	postRouter.HandleFunc("/delete", postHandler.DeletePost)
 	postRouter.HandleFunc("/list", postHandler.GetPostList)
 	postRouter.HandleFunc("/get", postHandler.GetPost)
+	userRouter := apiRouter.PathPrefix("/user").Subrouter()
+	userRouter.HandleFunc("/get", userHandler.Find)
 	// postRouter.HandleFunc("/edit", postHandler.UpdatePost)
 
 	corsMiddleware := middleware.CORSMiddleware()

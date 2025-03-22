@@ -5,10 +5,9 @@ import axios from "axios";
 import Modal from "./components/Modal";
 import PostCard from "./components/PostCard";
 import { Post, Paging } from "./types/post";
-import Image from "next/image";
 
 export default function Home() {
-  const [posts, setPosts] = useState<Post[]>([]); // 初期値は空の配列
+  const [posts, setPosts] = useState<Post[]>([]);
   const [paging, setPaging] = useState<Paging>({
     total_count: 0,
     page: 1,
@@ -22,7 +21,6 @@ export default function Home() {
       const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/post/list?page=${paging.page}&limit=${paging.per_page}`;
       const response = await axios.get(fetchURL, { withCredentials: true });
 
-      // APIのレスポンスを確認してpostsが配列であることを保証
       const fetchedPosts = Array.isArray(response.data.posts)
         ? response.data.posts
         : [];
@@ -71,15 +69,6 @@ export default function Home() {
         onClose={() => setShowModal(false)}
         onConfirm={deletePost}
       />
-      <div className="w-full">
-        <Image
-          src={"/top.jpg"}
-          alt="icon"
-          width={0}
-          height={0}
-          layout="responsive"
-        />
-      </div>
       <div className="py-20 px-6 md:px-12 lg:grid lg:grid-cols-4 lg:gap-8">
         {posts && posts.length > 0 ? (
           posts.map((post) => (

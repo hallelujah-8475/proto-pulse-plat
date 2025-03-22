@@ -10,7 +10,7 @@ interface PostCardProps {
 
 const PostCard: React.FC<PostCardProps> = ({ post, onDeleteClick }) => {
   return (
-    <div className="max-w-sm mx-auto bg-white dark:bg-gray-900 rounded-lg overflow-hidden shadow-lg">
+    <div className="max-w-sm mx-auto bg-white dark:bg-gray-900 rounded-lg overflow-hidden">
       <div className="px-4 pb-6">
         <div className="text-center my-4">
           <div className="p-8 max-w-lg border border-gray-300 rounded-2xl hover:shadow-xl hover:shadow-gray-50 flex flex-col items-center">
@@ -29,6 +29,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDeleteClick }) => {
                 <Link
                   href={{
                     pathname: `/post/detail/${post.id}`,
+                    query: { user_id: post.user_id },
                   }}
                   passHref
                 >
@@ -50,16 +51,6 @@ const PostCard: React.FC<PostCardProps> = ({ post, onDeleteClick }) => {
                   </button>
                 </div>
               )}
-              <Image
-                src={post.icon_image_base64 || "/noimage.jpg"}
-                className="shadow rounded-lg overflow-hidden border mt-4"
-                layout="responsive"
-                width={0}
-                height={0}
-                alt="icon"
-              />
-              <p className="mt-2 text-gray-600">{post.account_id}</p>
-              <p className="mt-2 text-gray-600">@{post.user_name}</p>
             </div>
           </div>
         </div>

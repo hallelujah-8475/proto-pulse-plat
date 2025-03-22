@@ -76,6 +76,7 @@ func BuildPostListResponse(
 				getImageBase64(user.IconFileName),
 				base64.StdEncoding.EncodeToString(user.IconData)),
 			IsOwnPost: loginUser != nil && user.UserName == loginUser.ScreenName,
+			UserID:    user.ID,
 		}
 		responsePosts = append(responsePosts, responsePost)
 	}
@@ -97,7 +98,7 @@ func BuildPostResponse(post *entity.Post, postImages []entity.PostImage) respons
 			"data:%s;base64,%s",
 			getImageBase64(postImage.FileName),
 			base64.StdEncoding.EncodeToString(postImage.Data),
-		);
+		)
 		postImagesBase64 = append(postImagesBase64, postImageBase64)
 	}
 
