@@ -5,6 +5,8 @@ type Post struct {
 	ID              uint   `json:"id"`
 	Title           string `json:"title"`
 	Content         string `json:"content"`
+	ContentTitle    string `json:"content_title"`
+	Location        string `json:"location"`
 	PostImageBase64 string `json:"post_image_base64"`
 	UserName        string `json:"user_name"`
 	AccountID       string `json:"account_id"`

@@ -4,10 +4,12 @@ import (
 	"proto-pulse-plat/infrastructure/model"
 )
 
-func ToModelPost(title, content string, userID uint) model.Post {
+func ToModelPost(title, content, contentTitle, location string, userID uint) model.Post {
 	return model.Post{
-		Title:   title,
-		Content: content,
-		UserID:  int(userID),
+		Title:        title,
+		Content:      content,
+		ContentTitle: contentTitle,
+		Location:     location,
+		UserID:       int(userID),
 	}
 }

@@ -14,22 +14,26 @@ type GormPostsRepository struct {
 }
 
 type Post struct {
-	ID        uint   `gorm:"primaryKey"`
-	Title     string `gorm:"size:255"`
-	Content   string `gorm:"type:text"`
-	UserID    uint   `gorm:"not null"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
+	ID           uint   `gorm:"primaryKey"`
+	Title        string `gorm:"size:255"`
+	Content      string `gorm:"type:text"`
+	ContentTitle string `gorm:"size:255"`
+	Location     string `gorm:"size:255"`
+	UserID       uint   `gorm:"not null"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func ToEntityPost(post Post) *entity.Post {
 	return &entity.Post{
-		ID:        post.ID,
-		Title:     post.Title,
-		Content:   post.Content,
-		UserID:    post.UserID,
-		CreatedAt: post.CreatedAt,
-		UpdatedAt: post.UpdatedAt,
+		ID:           post.ID,
+		Title:        post.Title,
+		Content:      post.Content,
+		ContentTitle: post.ContentTitle,
+		Location:     post.Location,
+		UserID:       post.UserID,
+		CreatedAt:    post.CreatedAt,
+		UpdatedAt:    post.UpdatedAt,
 	}
 }
 
@@ -68,9 +72,11 @@ func (r *GormPostsRepository) FindAllWithPagination(limit int, offset int) ([]en
 
 func (r *GormPostsRepository) Save(post model.Post) (*entity.Post, error) {
 	newPost := Post{
-		Title:   post.Title,
-		Content: post.Content,
-		UserID:  uint(post.UserID),
+		Title:        post.Title,
+		Content:      post.Content,
+		ContentTitle: post.ContentTitle,
+		Location:     post.Location,
+		UserID:       uint(post.UserID),
 	}
 
 	result := r.DB.Create(&newPost)

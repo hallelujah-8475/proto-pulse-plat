@@ -31,7 +31,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                   />
                 </div>
               </Link>
-              <div className="mt-8">
+              <div className="mt-8 text-left w-[250px]">
                 <Link
                   href={{
                     pathname: `/post/detail/${post.id}`,
@@ -39,8 +39,8 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                   }}
                 >
                   <h4 className="font-bold text-l">{post.title}</h4>
-                  <p className="mt-2 text-gray-600">呪術廻戦</p>
-                  <p className="mt-2 text-gray-600">東京都渋谷区</p>
+                  <p className="mt-2 text-gray-600">{post.content_title}</p>
+                  <p className="mt-2 text-gray-600">{post.location}</p>
                   <p className="mt-2 text-gray-600">2025/03/23 掲載</p>
                 </Link>
               </div>

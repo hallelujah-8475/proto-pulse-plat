@@ -2,6 +2,8 @@ export type Post = {
   id: number;
   title: string;
   content: string;
+  content_title: string;
+  location: string;
   post_image_base64: string;
   user_name: string;
   account_id: string;
@@ -27,4 +29,6 @@ export type PostFormData = {
   title: string;
   content: string;
   file: FileList;
+  content_title: string;
+  location: string;
 };

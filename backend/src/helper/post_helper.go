@@ -68,6 +68,8 @@ func BuildPostListResponse(
 			ID:              post.ID,
 			Title:           post.Title,
 			Content:         post.Content,
+			ContentTitle:    post.ContentTitle,
+			Location:        post.Location,
 			PostImageBase64: postImageBase64,
 			UserName:        user.UserName,
 			AccountID:       user.AccountID,

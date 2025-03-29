@@ -5,8 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"log"
-	"mime/multipart"
 	"net/http"
 	"os"
 	"proto-pulse-plat/app/presentation/http/web/validation"
@@ -25,8 +23,6 @@ type PostUsecase interface {
 	List(r *http.Request) (response.PostList, error)
 	Delete(r *http.Request) error
 	Add(r *http.Request) error
-	// Update(r *http.Request) error
-	FileUploads(files []*multipart.FileHeader) error
 	GetPost(r *http.Request) (response.PostDetail, error)
 }
 
@@ -222,12 +218,12 @@ func (u *postUsecase) Add(r *http.Request) error {
 		return errors.New(err.Error())
 	}
 
-	title, content, files, err := validation.ValidateFormInputs(r)
+	title, content, contentTitle, location, files, err := validation.ValidateFormInputs(r)
 	if err != nil {
 		return errors.New(err.Error())
 	}
 
-	savedPost, err := u.postRepo.Save(mapper.ToModelPost(title, content, uint(profile.ID)))
+	savedPost, err := u.postRepo.Save(mapper.ToModelPost(title, content, contentTitle, location, uint(profile.ID)))
 	if err != nil {
 		return errors.New(err.Error())
 	}
@@ -247,94 +243,6 @@ func (u *postUsecase) Add(r *http.Request) error {
 		err = u.postImageRepo.Save(mapper.ToModelPostImage(fileHeader.Filename, savedPost.ID, fileData))
 	}
 
-	return nil
-}
-
-// func (uc *postUsecase) Update(r *http.Request) error {
-// 	err := helper.ValidateMethod(r, http.MethodPut)
-// 	if err != nil {
-// 		return errors.New(err.Error())
-// 	}
-
-// 	postIDStr := r.URL.Query().Get("post_id")
-// 	if postIDStr == "" {
-// 		return errors.New(err.Error())
-// 	}
-
-// 	postID, err := strconv.Atoi(postIDStr)
-// 	if err != nil {
-// 		return errors.New(err.Error())
-// 	}
-
-// 	err = r.ParseMultipartForm(10 << 20)
-// 	if err != nil {
-// 		return errors.New(err.Error())
-// 	}
-
-// 	title := r.FormValue("title")
-// 	if title == "" {
-// 		return errors.New(err.Error())
-// 	}
-
-// 	content := r.FormValue("content")
-// 	if content == "" {
-// 		return errors.New(err.Error())
-// 	}
-
-// 	var file multipart.File
-// 	var fileHeader *multipart.FileHeader
-// 	file, fileHeader, err = r.FormFile("file")
-// 	if err != nil && err != http.ErrMissingFile {
-// 		return errors.New(err.Error())
-// 	}
-
-// 	if fileHeader != nil {
-// 		defer file.Close()
-
-// 		if fileHeader == nil {
-// 			return errors.New(err.Error())
-// 		}
-// 		fmt.Println("File uploaded:", fileHeader.Filename)
-// 	}
-
-// 	postEntity, err := uc.postRepo.FindByID(postID)
-// 	if err != nil {
-// 		return fmt.Errorf("could not find post with id %d: %w", postID, err)
-// 	}
-
-// 	post := model.Post{
-// 		ID:        postID,
-// 		Title:     title,
-// 		Content:   content,
-// 		UserID:    int(postEntity.UserID),
-// 		CreatedAt: time.Now(),
-// 		UpdatedAt: time.Now(),
-// 	}
-
-// 	if err := uc.postRepo.Update(post); err != nil {
-// 		return fmt.Errorf("failed to update post: %w", err)
-// 	}
-
-// 	return nil
-// }
-
-func (uc *postUsecase) FileUploads(files []*multipart.FileHeader) error {
-	if files == nil {
-		log.Println("files is nil")
-		return nil
-	}
-
-	for _, fileHeader := range files {
-		file, err := fileHeader.Open()
-		if err != nil {
-			return fmt.Errorf("failed to open file: %w", err)
-		}
-		defer file.Close()
-
-		if err := helper.UploadFileToS3(file, fileHeader.Filename); err != nil {
-			return fmt.Errorf("failed to upload file: %w", err)
-		}
-	}
 	return nil
 }
 

@@ -41,19 +41,24 @@ const PostPage: React.FC = () => {
     const data = new FormData();
     data.append("title", values.title);
     data.append("content", values.content);
+    data.append("content_title", values.content_title);
+    data.append("location", values.location);
 
     Array.from(values.file).forEach((file) => {
       data.append("files[]", file);
     });
 
-    const add_post_URL = process.env.NEXT_PUBLIC_API_URL + "/post/add";
     try {
-      const response = await axios.post(add_post_URL, data, {
-        withCredentials: true,
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        process.env.NEXT_PUBLIC_API_URL + "/post/add",
+        data,
+        {
+          withCredentials: true,
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       if (response.status === 200) {
         router.push("/post/complete");
       } else {
@@ -78,6 +83,14 @@ const PostPage: React.FC = () => {
               <p className="mb-2">タイトル:</p>
               <p className="border p-3 mb-4 border-none">
                 {getValues("title") || "タイトルがありません"}
+              </p>
+              <p className="mb-2">コンテンツ名:</p>
+              <p className="border p-3 mb-4 border-none">
+                {getValues("content_title") || "コンテンツ名がありません"}
+              </p>
+              <p className="mb-2">取引場所:</p>
+              <p className="border p-3 mb-4 border-none">
+                {getValues("location") || "取引場所がありません"}
               </p>
               <p className="mb-2">投稿内容:</p>
               <p className="border p-3 mb-4 border-none">
@@ -131,7 +144,40 @@ const PostPage: React.FC = () => {
                   <p className="text-red-500">{errors.title.message}</p>
                 )}
               </div>
-
+              <div>
+                <label
+                  className="block text-gray-700 text-xs font-bold mb-2"
+                  htmlFor="content_title"
+                >
+                  コンテンツ名
+                </label>
+                <input
+                  {...register("content_title", {
+                    required: "コンテンツ名を入力してください",
+                  })}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                />
+                {errors.content_title && (
+                  <p className="text-red-500">{errors.content_title.message}</p>
+                )}
+              </div>
+              <div>
+                <label
+                  className="block text-gray-700 text-xs font-bold mb-2"
+                  htmlFor="location"
+                >
+                  取引場所
+                </label>
+                <input
+                  {...register("location", {
+                    required: "取引場所を入力してください",
+                  })}
+                  className="appearance-none block w-full bg-gray-200 text-gray-700 border rounded py-3 px-4 mb-3 leading-tight focus:outline-none focus:bg-white"
+                />
+                {errors.location && (
+                  <p className="text-red-500">{errors.location.message}</p>
+                )}
+              </div>
               <div>
                 <label
                   className="block text-gray-700 text-xs font-bold mb-2"
@@ -149,7 +195,6 @@ const PostPage: React.FC = () => {
                   <p className="text-red-500">{errors.content.message}</p>
                 )}
               </div>
-
               <div>
                 <input
                   type="file"
@@ -164,7 +209,6 @@ const PostPage: React.FC = () => {
                   <p className="text-red-500">ファイルを選択してください</p>
                 )}
               </div>
-
               <div className="grid grid-cols-3 gap-2 mt-4">
                 {previewUrls.map((url, index) => (
                   <Image
@@ -178,9 +222,7 @@ const PostPage: React.FC = () => {
                   />
                 ))}
               </div>
-
               {errorMessage && <p className="text-red-500">{errorMessage}</p>}
-
               <div className="flex justify-end w-full px-3 mt-5">
                 <button
                   className="shadow bg-indigo-600 hover:bg-indigo-400 text-white font-bold py-2 px-6 rounded"
