@@ -15,8 +15,10 @@ export default function Home() {
 
   const fetchPosts = useCallback(async () => {
     try {
-      const fetchURL = `${process.env.NEXT_PUBLIC_API_URL}/post/list?page=${paging.page}&limit=${paging.per_page}`;
-      const response = await axios.get(fetchURL, { withCredentials: true });
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/post/list?page=${paging.page}&limit=${paging.per_page}`,
+        { withCredentials: true }
+      );
 
       const fetchedPosts = Array.isArray(response.data.posts)
         ? response.data.posts

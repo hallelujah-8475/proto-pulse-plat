@@ -33,17 +33,16 @@ const PostDetailPage: React.FC = () => {
 
   const fetchPostDetail = async () => {
     try {
-      const post_URL = `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`;
-      const response = await fetch(post_URL);
-      if (response.ok) {
-        const postDetail = await response.json();
-        setPostDetail({
-          id: postDetail.id,
-          title: postDetail.title,
-          content: postDetail.content,
-          post_images_base64: postDetail.post_images_base64,
-        });
-      }
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`
+      );
+      const postDetail = response.data;
+      setPostDetail({
+        id: postDetail.id,
+        title: postDetail.title,
+        content: postDetail.content,
+        post_images_base64: postDetail.post_images_base64,
+      });
     } catch (error) {
       console.error("Error fetching post details:", error);
     }
@@ -51,20 +50,19 @@ const PostDetailPage: React.FC = () => {
 
   const fetchUserDetail = async () => {
     try {
-      const user_URL = `${process.env.NEXT_PUBLIC_API_URL}/user/get?user_id=${userId}`;
-      const response = await fetch(user_URL);
-      if (response.ok) {
-        const userDetail: User = await response.json();
-        setUserDetail({
-          id: userDetail.id,
-          user_name: userDetail.user_name,
-          account_id: userDetail.account_id,
-          icon_image_base64: userDetail.icon_image_base64,
-        });
+      const response = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/user/get?user_id=${userId}`
+      );
+      const userDetail: User = response.data;
+      setUserDetail({
+        id: userDetail.id,
+        user_name: userDetail.user_name,
+        account_id: userDetail.account_id,
+        icon_image_base64: userDetail.icon_image_base64,
+      });
 
-        if (userDetail.id == Number(userId)) {
-          setIsOwnPost(true);
-        }
+      if (userDetail.id == Number(userId)) {
+        setIsOwnPost(true);
       }
     } catch (error) {
       console.error("Error fetching user details:", error);
@@ -98,10 +96,9 @@ const PostDetailPage: React.FC = () => {
 
   const deletePost = async () => {
     if (postToDelete === null) return;
-    const deleteURL = process.env.NEXT_PUBLIC_API_URL + "/post/delete";
     try {
       await axios.post(
-        deleteURL,
+        `${process.env.NEXT_PUBLIC_API_URL}/post/delete`,
         { post_id: postToDelete },
         { headers: { "Content-Type": "application/json" } }
       );
@@ -141,7 +138,6 @@ const PostDetailPage: React.FC = () => {
           <pre className="text-gray-700 mb-4 whitespace-pre-wrap">
             {postDetail != null ? postDetail.content : ""}
           </pre>
-
           <div className="relative w-full">
             <div className="relative w-full h-auto overflow-visible rounded-lg md:h-auto border">
               <Image
@@ -157,7 +153,6 @@ const PostDetailPage: React.FC = () => {
                 height={0}
               />
             </div>
-
             <nav className="inline-flex w-full justify-between mt-4">
               <button
                 className="flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 dark:text-white bg-white dark:bg-gray-800 transition-colors hover:border-blue-600 hover:bg-blue-400 hover:text-white dark:hover:text-white"
@@ -172,7 +167,6 @@ const PostDetailPage: React.FC = () => {
                 次の画像
               </button>
             </nav>
-
             <section className="text-gray-600 body-font">
               <div className="container px-5 py-24 mx-auto">
                 <div className="flex flex-wrap -m-2">

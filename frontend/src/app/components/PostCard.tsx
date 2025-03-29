@@ -21,7 +21,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                   },
                 }}
               >
-                <div className="w-[230px] h-[230px] relative">
+                <div className="w-[250px] h-[250px] relative">
                   <Image
                     src={post.post_image_base64 || "/noimage.jpg"}
                     alt="icon"
@@ -35,9 +35,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                 <Link
                   href={{
                     pathname: `/post/detail/${post.id}`,
-                    query: {
-                      user_id: post.user_id,
-                    },
+                    query: { user_id: post.user_id },
                   }}
                 >
                   <h4 className="font-bold text-l">{post.title}</h4>
