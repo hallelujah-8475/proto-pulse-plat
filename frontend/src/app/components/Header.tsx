@@ -81,8 +81,8 @@ export const Header: React.FC = () => {
           <Image
             src="/logo.png"
             alt="Logo"
-            width={170}
-            height={50}
+            width={110}
+            height={40}
             className="rounded-lg"
           />
         </a>

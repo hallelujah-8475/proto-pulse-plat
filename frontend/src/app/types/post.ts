@@ -18,9 +18,9 @@ export type PostDetail = {
 };
 
 export type Paging = {
-  total_count: number;
-  page: number;
-  per_page: number;
+  total_count: 0;
+  page: 1;
+  per_page: 8;
 };
 
 export type PostFormData = {

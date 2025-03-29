@@ -2,7 +2,6 @@
 
 import React, { useCallback, useEffect, useState } from "react";
 import axios from "axios";
-import Modal from "./components/Modal";
 import PostCard from "./components/PostCard";
 import { Post, Paging } from "./types/post";
 
@@ -13,8 +12,6 @@ export default function Home() {
     page: 1,
     per_page: 8,
   });
-  const [showModal, setShowModal] = useState(false);
-  const [postToDelete, setPostToDelete] = useState<number | null>(null);
 
   const fetchPosts = useCallback(async () => {
     try {
@@ -36,50 +33,17 @@ export default function Home() {
     }
   }, [paging.page, paging.per_page]);
 
-  const confirmDeletePost = (postId: number) => {
-    setPostToDelete(postId);
-    setShowModal(true);
-  };
-
-  const deletePost = async () => {
-    if (postToDelete === null) return;
-    const deleteURL = process.env.NEXT_PUBLIC_API_URL + "/post/delete";
-    try {
-      await axios.post(
-        deleteURL,
-        { post_id: postToDelete },
-        { headers: { "Content-Type": "application/json" } }
-      );
-      setPosts(posts.filter((post) => post.id !== postToDelete));
-      setPostToDelete(null);
-      setShowModal(false);
-    } catch (error) {
-      console.error("Error deleting post:", error);
-    }
-  };
-
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
 
   return (
     <>
-      <Modal
-        showModal={showModal}
-        onClose={() => setShowModal(false)}
-        onConfirm={deletePost}
-      />
-      <div className="py-20 px-6 md:px-12 lg:grid lg:grid-cols-4 lg:gap-8">
+      <div className="py-20 px-6 md:px-16 lg:grid lg:grid-cols-4 lg:gap-2">
         {posts && posts.length > 0 ? (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              onDeleteClick={confirmDeletePost}
-            />
-          ))
+          posts.map((post) => <PostCard key={post.id} post={post} />)
         ) : (
-          <p>No posts available</p>
+          <p>まだ投稿はありません。</p>
         )}
       </div>
     </>
