@@ -56,19 +56,30 @@ func (r *GormPostsRepository) Delete(postID int) error {
 	return nil
 }
 
-func (r *GormPostsRepository) FindAllWithPagination(limit int, offset int) ([]entity.Post, int64, error) {
+func (r *GormPostsRepository) FindAllWithPagination(
+    limit int, 
+    offset int, 
+    title string,
+) ([]entity.Post, int64, error) {
 	var posts []entity.Post
 	var count int64
 
-	result := r.DB.Order("updated_at DESC").Limit(limit).Offset(offset).Find(&posts)
+	query := r.DB.Debug().Model(&entity.Post{})
+
+	if title != "" {
+		query = query.Where("title ILIKE ?", "%"+title+"%")
+	}
+
+	query.Count(&count)
+
+	result := query.Order("updated_at DESC").Limit(limit).Offset(offset).Find(&posts)
 	if result.Error != nil {
 		return nil, 0, result.Error
 	}
 
-	r.DB.Model(&entity.Post{}).Count(&count)
-
 	return posts, count, nil
 }
+
 
 func (r *GormPostsRepository) Save(post model.Post) (*entity.Post, error) {
 	newPost := Post{

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"proto-pulse-plat/app/application/web/usecase"
 	"proto-pulse-plat/helper"
@@ -19,6 +20,7 @@ func NewPostHandler(
 }
 
 func (oc *PostHandler) GetPostList(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("post_handler.go GetPostList")
 	postList, err := oc.PostUsecase.List(r)
 	if err != nil {
 		helper.WriteErrorResponse(w, "Failed GetPostList", http.StatusInternalServerError)

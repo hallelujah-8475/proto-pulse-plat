@@ -55,7 +55,7 @@ func (u *postUsecase) List(r *http.Request) (response.PostList, error) {
 	cookie, err := r.Cookie("auth_token")
 	if err != nil {
 		if err == http.ErrNoCookie {
-			// JWT がない場合でも動作するように profile を nil に設定
+			// JWT がない場合でも profile を nil に設定
 			profile = nil
 		} else {
 			return response.PostList{}, fmt.Errorf("failed to get cookie: %v", err)
@@ -109,8 +109,11 @@ func (u *postUsecase) List(r *http.Request) (response.PostList, error) {
 
 	offset := (page - 1) * perPage
 
+	// 🔥 検索条件を取得
+	title := r.URL.Query().Get("title") // 検索条件を取得
+
 	// 投稿データを取得
-	posts, totalCount, err := u.postRepo.FindAllWithPagination(perPage, offset)
+	posts, totalCount, err := u.postRepo.FindAllWithPagination(perPage, offset, title)
 	if err != nil {
 		return response.PostList{}, err
 	}
