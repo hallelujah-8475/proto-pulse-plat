@@ -41,7 +41,7 @@ const PostCard: React.FC<PostCardProps> = ({ post }) => {
                   <h4 className="font-bold text-l">{post.title}</h4>
                   <p className="mt-2 text-gray-600">{post.content_title}</p>
                   <p className="mt-2 text-gray-600">{post.location}</p>
-                  <p className="mt-2 text-gray-600">2025/03/23 掲載</p>
+                  <p className="mt-2 text-gray-600">{post.created_at} 掲載</p>
                 </Link>
               </div>
             </div>

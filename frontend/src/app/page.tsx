@@ -55,7 +55,7 @@ export default function Home() {
 
   useEffect(() => {
     fetchPosts("", "");
-  }, [fetchPosts]);
+  }, [fetchPosts, paging.page, paging.per_page]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -100,6 +100,14 @@ export default function Home() {
     fetchPosts(selectedCategory, searchKeyword);
   };
 
+  const handlePageChange = (newPage: number) => {
+    if (newPage > 0 && newPage <= totalPages) {
+      setPaging({ ...paging, page: newPage });
+    }
+  };
+
+  const totalPages = Math.ceil(paging.total_count / paging.per_page);
+
   return (
     <>
       <form className="max-w-lg mx-auto p-4" onSubmit={handleSearch}>
@@ -113,9 +121,11 @@ export default function Home() {
           >
             {selectedCategory === "title"
               ? "タイトル"
-              : selectedCategory === "content"
-              ? "内容"
-              : "取引場所"}{" "}
+              : selectedCategory === "content_title"
+              ? "コンテンツ"
+              : selectedCategory === "location"
+              ? "取引場所"
+              : ""}
             <svg
               className="w-2.5 h-2.5 ms-2.5"
               aria-hidden="true"
@@ -189,9 +199,9 @@ export default function Home() {
                 <button
                   type="button"
                   className="w-full px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600"
-                  onClick={() => handleCategorySelect("content")}
+                  onClick={() => handleCategorySelect("content_title")}
                 >
-                  内容
+                  コンテンツ
                 </button>
               </li>
               <li>
@@ -213,6 +223,81 @@ export default function Home() {
         ) : (
           <p>まだ投稿はありません。</p>
         )}
+      </div>
+      <div className="flex justify-center mt-8 mb-5">
+        <ol className="flex list-reset space-x-1">
+          {/* Previous Button */}
+          <li>
+            <button
+              onClick={() => {
+                if (paging.page > 1) {
+                  handlePageChange(paging.page - 1);
+                }
+              }}
+              className={`inline-flex items-center justify-center w-8 h-8 border border-gray-100 rounded ${
+                paging.page > 1 ? "" : "opacity-50 cursor-not-allowed"
+              }`}
+              disabled={paging.page <= 1}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-3 h-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+
+          {/* Page Numbers */}
+          {Array.from({ length: totalPages }, (_, index) => (
+            <li key={index}>
+              <button
+                onClick={() => handlePageChange(index + 1)}
+                className={`block w-8 h-8 text-center border border-gray-100 rounded leading-8 ${
+                  paging.page === index + 1
+                    ? "text-white bg-blue-600 border-blue-600"
+                    : "text-gray-600"
+                }`}
+              >
+                {index + 1}
+              </button>
+            </li>
+          ))}
+
+          {/* Next Button */}
+          <li>
+            <button
+              onClick={() => {
+                if (paging.page < totalPages) {
+                  handlePageChange(paging.page + 1);
+                }
+              }}
+              className={`inline-flex items-center justify-center w-8 h-8 border border-gray-100 rounded ${
+                paging.page < totalPages ? "" : "opacity-50 cursor-not-allowed"
+              }`}
+              disabled={paging.page >= totalPages}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="w-3 h-3"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </li>
+        </ol>
       </div>
     </>
   );

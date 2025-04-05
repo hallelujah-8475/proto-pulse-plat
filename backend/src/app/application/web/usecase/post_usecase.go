@@ -109,11 +109,12 @@ func (u *postUsecase) List(r *http.Request) (response.PostList, error) {
 
 	offset := (page - 1) * perPage
 
-	// 🔥 検索条件を取得
-	title := r.URL.Query().Get("title") // 検索条件を取得
+	title := r.URL.Query().Get("title")
+	contentTitle := r.URL.Query().Get("content_title")
+	location := r.URL.Query().Get("location")
 
 	// 投稿データを取得
-	posts, totalCount, err := u.postRepo.FindAllWithPagination(perPage, offset, title)
+	posts, totalCount, err := u.postRepo.FindAllWithPagination(perPage, offset, title, contentTitle, location)
 	if err != nil {
 		return response.PostList{}, err
 	}

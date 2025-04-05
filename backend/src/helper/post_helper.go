@@ -79,6 +79,7 @@ func BuildPostListResponse(
 				base64.StdEncoding.EncodeToString(user.IconData)),
 			IsOwnPost: loginUser != nil && user.UserName == loginUser.ScreenName,
 			UserID:    user.ID,
+			CreatedAt: post.CreatedAt.Format("2006年01月02日"),
 		}
 		responsePosts = append(responsePosts, responsePost)
 	}

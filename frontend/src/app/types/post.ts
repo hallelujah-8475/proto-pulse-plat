@@ -10,6 +10,7 @@ export type Post = {
   icon_image_base64: string;
   is_own_post: boolean;
   user_id: number;
+  created_at: string;
 };
 
 export type PostDetail = {
@@ -20,9 +21,9 @@ export type PostDetail = {
 };
 
 export type Paging = {
-  total_count: 0;
-  page: 1;
-  per_page: 8;
+  total_count: number;
+  page: number;
+  per_page: number;
 };
 
 export type PostFormData = {

@@ -13,6 +13,7 @@ type Post struct {
 	IconImageBase64 string `json:"icon_image_base64"`
 	IsOwnPost       bool   `json:"is_own_post"`
 	UserID          uint   `json:"user_id"`
+	CreatedAt string `json:"created_at"`
 }
 
 type PostList struct {

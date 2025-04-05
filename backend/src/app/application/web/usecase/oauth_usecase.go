@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/url"
 	"proto-pulse-plat/config"
+	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/domain/repository"
 	"proto-pulse-plat/helper"
 	"proto-pulse-plat/infrastructure/mapper"
@@ -17,6 +18,7 @@ import (
 	"time"
 
 	"github.com/dghubble/oauth1"
+	"gorm.io/gorm"
 )
 
 type OAuthUsecase interface {
@@ -163,9 +165,23 @@ func (ou *oauthUsecase) GetOAuthResponse(r *http.Request) (string, error) {
 		log.Fatal(err)
 	}
 
-	user, err := ou.userRepo.Save(mapper.ToModelUser(profile.ScreenName, profile.Name, "test.jpg", imageData))
+	registerdUser, err := ou.userRepo.FindByUserName(profile.ScreenName)
 	if err != nil {
-		return "", errors.New("failed to save user")
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			registerdUser = nil
+		}else {
+			return "", errors.New("failed to save user")
+		}
+	}
+
+	var user *entity.User
+	if registerdUser == nil {
+		user, err = ou.userRepo.Save(mapper.ToModelUser(profile.ScreenName, profile.Name, "test.jpg", imageData))
+		if err != nil {
+			return "", errors.New("failed to save user")
+		}
+	}else {
+		user = registerdUser
 	}
 
 	tokenString, err := helper.GenerateJWT(profile, *user)
