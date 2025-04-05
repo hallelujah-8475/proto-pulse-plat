@@ -153,20 +153,24 @@ const PostDetailPage: React.FC = () => {
                 height={0}
               />
             </div>
-            <nav className="inline-flex w-full justify-between mt-4">
-              <button
-                className="flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 dark:text-white bg-white dark:bg-gray-800 transition-colors hover:border-blue-600 hover:bg-blue-400 hover:text-white dark:hover:text-white"
-                onClick={handlePrevSlide}
-              >
-                前の画像
-              </button>
-              <button
-                className="flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 dark:text-white bg-white dark:bg-gray-800 transition-colors hover:border-blue-600 hover:bg-blue-400 hover:text-white dark:hover:text-white"
-                onClick={handleNextSlide}
-              >
-                次の画像
-              </button>
-            </nav>
+            {postDetail != null
+              ? postDetail.post_images_base64.length > 1 && (
+                  <nav className="inline-flex w-full justify-between mt-4">
+                    <button
+                      className="flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 dark:text-white bg-white dark:bg-gray-800 transition-colors hover:border-blue-600 hover:bg-blue-400 hover:text-white dark:hover:text-white"
+                      onClick={handlePrevSlide}
+                    >
+                      前の画像
+                    </button>
+                    <button
+                      className="flex items-center py-2 px-3 rounded font-medium select-none border text-gray-900 dark:text-white bg-white dark:bg-gray-800 transition-colors hover:border-blue-600 hover:bg-blue-400 hover:text-white dark:hover:text-white"
+                      onClick={handleNextSlide}
+                    >
+                      次の画像
+                    </button>
+                  </nav>
+                )
+              : ""}
             <section className="text-gray-600 body-font">
               <div className="container px-5 py-24 mx-auto">
                 <div className="flex flex-wrap -m-2">
