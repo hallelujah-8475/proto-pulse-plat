@@ -53,6 +53,9 @@ func main() {
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
+
+	apiRouter.Use(middleware.SessionMiddleware)
+
 	apiRouter.HandleFunc("/health", healthCheckHandler.HealthCheck)
 	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthCertificate)
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.OauthCallback)
@@ -64,7 +67,6 @@ func main() {
 	postRouter.HandleFunc("/get", postHandler.GetPost)
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()
 	userRouter.HandleFunc("/get", userHandler.Find)
-	// postRouter.HandleFunc("/edit", postHandler.UpdatePost)
 
 	corsMiddleware := middleware.CORSMiddleware()
 	srv := &http.Server{
