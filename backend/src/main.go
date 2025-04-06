@@ -53,16 +53,13 @@ func main() {
 
 	r := mux.NewRouter()
 	apiRouter := r.PathPrefix("/api").Subrouter()
-
-	apiRouter.Use(middleware.SessionMiddleware)
-
 	apiRouter.HandleFunc("/health", healthCheckHandler.HealthCheck)
 	apiRouter.HandleFunc("/oauth", oauthClientHandler.OauthCertificate)
 	apiRouter.HandleFunc("/oauth2callback", oauthClientHandler.OauthCallback)
 	apiRouter.HandleFunc("/logout", logoutHandler.Logout)
 	postRouter := apiRouter.PathPrefix("/post").Subrouter()
-	postRouter.HandleFunc("/add", postHandler.AddPost)
-	postRouter.HandleFunc("/delete", postHandler.DeletePost)
+	postRouter.HandleFunc("/add", middleware.SessionMiddleware(http.HandlerFunc(postHandler.AddPost)).ServeHTTP)
+	postRouter.HandleFunc("/delete", middleware.SessionMiddleware(http.HandlerFunc(postHandler.DeletePost)).ServeHTTP)
 	postRouter.HandleFunc("/list", postHandler.GetPostList)
 	postRouter.HandleFunc("/get", postHandler.GetPost)
 	userRouter := apiRouter.PathPrefix("/user").Subrouter()

@@ -4,8 +4,8 @@ import { Header } from "@/app/components/Header";
 import { Footer } from "@/app/components/Footer";
 
 export const metadata: Metadata = {
-  title: "proto-pulse-plat",
-  description: "It's practice.",
+  title: "コストレ！",
+  description: "気軽にコスプレグッズをシェアしよう。",
 };
 
 export default function RootLayout({
