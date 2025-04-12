@@ -23,6 +23,44 @@ const PostDetailPage: React.FC = () => {
   const userId = useSearchParams().get("user_id");
 
   useEffect(() => {
+    const fetchPostDetail = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`
+        );
+        const postDetail = response.data;
+        setPostDetail({
+          id: postDetail.id,
+          title: postDetail.title,
+          content: postDetail.content,
+          post_images_base64: postDetail.post_images_base64,
+        });
+      } catch (error) {
+        console.error("Error fetching post details:", error);
+      }
+    };
+
+    const fetchUserDetail = async () => {
+      try {
+        const response = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/user/get?user_id=${userId}`
+        );
+        const userDetail: User = response.data;
+        setUserDetail({
+          id: userDetail.id,
+          user_name: userDetail.user_name,
+          account_id: userDetail.account_id,
+          icon_image_base64: userDetail.icon_image_base64,
+        });
+
+        if (userDetail.id == Number(userId)) {
+          setIsOwnPost(true);
+        }
+      } catch (error) {
+        console.error("Error fetching user details:", error);
+      }
+    };
+
     if (postId) {
       fetchPostDetail();
     }
@@ -31,44 +69,6 @@ const PostDetailPage: React.FC = () => {
       fetchUserDetail();
     }
   }, [postId, userId]);
-
-  const fetchPostDetail = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/post/get?post_id=${postId}`
-      );
-      const postDetail = response.data;
-      setPostDetail({
-        id: postDetail.id,
-        title: postDetail.title,
-        content: postDetail.content,
-        post_images_base64: postDetail.post_images_base64,
-      });
-    } catch (error) {
-      console.error("Error fetching post details:", error);
-    }
-  };
-
-  const fetchUserDetail = async () => {
-    try {
-      const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/user/get?user_id=${userId}`
-      );
-      const userDetail: User = response.data;
-      setUserDetail({
-        id: userDetail.id,
-        user_name: userDetail.user_name,
-        account_id: userDetail.account_id,
-        icon_image_base64: userDetail.icon_image_base64,
-      });
-
-      if (userDetail.id == Number(userId)) {
-        setIsOwnPost(true);
-      }
-    } catch (error) {
-      console.error("Error fetching user details:", error);
-    }
-  };
 
   const handlePrevSlide = () => {
     if (postDetail) {
