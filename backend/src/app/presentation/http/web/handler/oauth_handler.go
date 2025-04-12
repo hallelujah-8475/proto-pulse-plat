@@ -59,7 +59,7 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: false,
-		Secure:   false, // 本番環境では true にする
+		Secure:   true, // 本番環境では true にする
 	})
 
 	http.Redirect(w, r, fmt.Sprintf("%s", os.Getenv("BASE_HTTPS_URL")), http.StatusSeeOther)
