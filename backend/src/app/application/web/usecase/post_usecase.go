@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"proto-pulse-plat/app/presentation/http/web/validation"
@@ -172,6 +173,12 @@ func (u *postUsecase) Delete(r *http.Request) error {
 }
 
 func (u *postUsecase) Add(r *http.Request) error {
+	defer func() {
+		if rec := recover(); rec != nil {
+			log.Printf("panic recovered in Add: %v", rec)
+		}
+	}()
+	
 	err := helper.ValidateMethod(r, http.MethodPost)
 	if err != nil {
 		return errors.New(err.Error())
