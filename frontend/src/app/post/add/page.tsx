@@ -63,6 +63,7 @@ const PostPage: React.FC = () => {
         router.push("/post/complete");
       }
     } catch (error) {
+      console.log(error);
       alert(
         "セッションの有効期限が切れています。\nもう一度ログインしてやり直してください。"
       );
