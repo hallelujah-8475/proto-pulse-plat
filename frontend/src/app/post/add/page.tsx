@@ -245,6 +245,7 @@ const PostPage: React.FC = () => {
                 <input
                   type="file"
                   multiple
+                  accept="image/*"
                   {...register("file", {
                     required: "ファイルを選択してください",
                   })}
