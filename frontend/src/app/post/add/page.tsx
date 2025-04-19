@@ -29,7 +29,8 @@ const PostPage: React.FC = () => {
   };
 
   const onSubmit: SubmitHandler<PostFormData> = (data) => {
-    if (errors.title || errors.content || !data.file?.length) {
+    const files = getValues("file");
+    if (errors.title || errors.content || !files || data.file.length === 0) {
       setErrorMessage("ファイルを選択してください");
       return;
     }
