@@ -60,6 +60,7 @@ func (oc *OAuthClient) OauthCallback(w http.ResponseWriter, r *http.Request) {
 		Expires:  time.Now().Add(24 * time.Hour),
 		HttpOnly: true,
 		Secure:   true, // 本番環境では true にする
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	http.Redirect(w, r, fmt.Sprintf("%s", os.Getenv("BASE_HTTPS_URL")), http.StatusSeeOther)
