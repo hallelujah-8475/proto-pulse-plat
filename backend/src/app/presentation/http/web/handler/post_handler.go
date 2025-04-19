@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"fmt"
 	"net/http"
 	"proto-pulse-plat/app/application/web/usecase"
 	"proto-pulse-plat/helper"
@@ -43,6 +44,7 @@ func (oc *PostHandler) DeletePost(w http.ResponseWriter, r *http.Request) {
 func (oc *PostHandler) AddPost(w http.ResponseWriter, r *http.Request) {
 	err := oc.PostUsecase.Add(r)
 	if err != nil {
+		fmt.Println(err)
 		helper.WriteErrorResponse(w, "Failed to add post", http.StatusInternalServerError)
 		return
 	}

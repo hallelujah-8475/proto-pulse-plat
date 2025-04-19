@@ -247,6 +247,7 @@ func (u *postUsecase) Add(r *http.Request) error {
 		}
 
 		err = u.postImageRepo.Save(mapper.ToModelPostImage(fileHeader.Filename, savedPost.ID, fileData))
+		fmt.Println(err)
 	}
 
 	return nil
