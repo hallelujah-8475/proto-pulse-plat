@@ -257,9 +257,9 @@ const PostPage: React.FC = () => {
                   accept="image/*"
                   {...register("file", {
                     required: "ファイルを選択してください",
+                    onChange: (e) => handleFileChange(e),
                   })}
                   className="block w-full text-sm text-gray-900 border rounded-lg bg-gray-50 cursor-pointer"
-                  onChange={handleFileChange}
                 />
                 {errors.file && (
                   <p className="text-red-500">ファイルを選択してください</p>
