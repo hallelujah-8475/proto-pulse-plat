@@ -8,19 +8,12 @@ import (
 	"encoding/base64"
 	"fmt"
 	"io"
-	"log"
 	"net/http"
-	"os"
 	"path/filepath"
 	"proto-pulse-plat/domain/entity"
 	"proto-pulse-plat/infrastructure/model"
 	"proto-pulse-plat/infrastructure/response"
 	"strings"
-
-	"github.com/aws/aws-sdk-go/aws"
-	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/s3"
 )
 
 func PostListQueryParams(r *http.Request) (string, string) {
@@ -115,49 +108,6 @@ func BuildPostResponse(post *entity.Post, postImages []entity.PostImage) respons
 	return responsePost
 }
 
-func GetPostBase64Image(fileName string) string {
-	// LocalStackのS3クライアントを作成
-	sess := session.Must(session.NewSession(&aws.Config{
-		Endpoint:         aws.String(os.Getenv("S3_ENDPOINT")),
-		Region:           aws.String(os.Getenv("S3_REGION")),
-		Credentials:      credentials.NewStaticCredentials("dummy", "dummy", ""),
-		S3ForcePathStyle: aws.Bool(true),
-	}))
-	svc := s3.New(sess)
-
-	// S3からオブジェクトを取得するリクエスト
-	output, err := svc.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String(os.Getenv("S3_BUCKET_NAME")),
-		Key:    aws.String(fileName),
-	})
-	if err != nil {
-		return ""
-	}
-	defer output.Body.Close()
-
-	// バイトデータとして読み込み
-	buf := new(bytes.Buffer)
-	_, err = io.Copy(buf, output.Body)
-	if err != nil {
-		fmt.Println("failed to read object body: %w", err)
-		return ""
-	}
-
-	decryptedImage, err := decrypt(buf.Bytes(), "thisis16byteskey")
-	if err != nil {
-		log.Println("decrypt is error")
-		return ""
-	}
-
-	// 画像データをBase64エンコード
-	encodedImage := base64.StdEncoding.EncodeToString(decryptedImage)
-
-	// レスポンスボディにBase64エンコードされた画像データを含める
-	response := fmt.Sprintf("data:%s;base64,%s", getImageBase64(fileName), encodedImage)
-
-	return response
-}
-
 func getImageBase64(iconURL string) string {
 	// ファイル名から拡張子を取得
 	ext := strings.ToLower(filepath.Ext(iconURL))
@@ -180,57 +130,6 @@ func getImageBase64(iconURL string) string {
 	}
 
 	return mimeType
-}
-
-func UploadFileToS3(file io.Reader, filename string) error {
-	// LocalStackのS3クライアントを作成
-	sess := session.Must(session.NewSession(&aws.Config{
-		Endpoint:         aws.String(os.Getenv("S3_ENDPOINT")),
-		Region:           aws.String(os.Getenv("S3_REGION")),
-		Credentials:      credentials.NewStaticCredentials("dummy", "dummy", ""),
-		S3ForcePathStyle: aws.Bool(true),
-	}))
-	svc := s3.New(sess)
-
-	// バケットが存在するか確認し、必要に応じて作成
-	bucketName := os.Getenv("S3_BUCKET_NAME")
-	_, err := svc.HeadBucket(&s3.HeadBucketInput{
-		Bucket: aws.String(bucketName),
-	})
-	if err != nil {
-		_, err = svc.CreateBucket(&s3.CreateBucketInput{
-			Bucket: aws.String(bucketName),
-		})
-		if err != nil {
-			log.Fatalf("Failed to create bucket: %v", err)
-		}
-		fmt.Printf("Successfully created bucket %s\n", bucketName)
-	}
-
-	// ファイルの内容を読み取る
-	fileBytes, err := io.ReadAll(file)
-	if err != nil {
-		return fmt.Errorf("failed to read file: %w", err)
-	}
-
-	// AESで暗号化
-	encryptedData, err := encrypt(fileBytes, "thisis16byteskey")
-	if err != nil {
-		return fmt.Errorf("failed to encrypt file: %w", err)
-	}
-
-	// S3にアップロード
-	_, err = svc.PutObject(&s3.PutObjectInput{
-		Bucket: aws.String(bucketName),
-		Key:    aws.String(filename),
-		Body:   bytes.NewReader(encryptedData),
-	})
-	if err != nil {
-		return fmt.Errorf("failed to upload to S3: %w", err)
-	}
-
-	fmt.Printf("Successfully uploaded file %s to S3\n", filename)
-	return nil
 }
 
 // AES暗号化

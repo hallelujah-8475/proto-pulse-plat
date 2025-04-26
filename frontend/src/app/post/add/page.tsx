@@ -30,16 +30,7 @@ const PostPage: React.FC = () => {
 
   const onSubmit: SubmitHandler<PostFormData> = (data) => {
     const files = getValues("file");
-    alert(errors.title);
-    alert(errors.content);
-    alert(files);
-    alert(data.file.length);
     if (errors.title || errors.content || !files || data.file.length === 0) {
-      alert("in if");
-      alert(errors.title);
-      alert(errors.content);
-      alert(files);
-      alert(data.file.length);
       setErrorMessage("ファイルを選択してください");
       return;
     }
